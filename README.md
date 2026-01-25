@@ -9,4 +9,4 @@ This project is a RESTful API for managing personal finances, including users, a
 - MySQL (or H2 for dev)
 - Maven
 
-###  In development
+###  🚧 In development
