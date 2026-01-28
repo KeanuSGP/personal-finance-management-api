@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.exception;
 
+import com.keanusantos.personalfinancemanager.domain.financialaccount.exception.FinancialAccountAlreadyExists;
 import com.keanusantos.personalfinancemanager.domain.user.exception.EmailAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.domain.user.exception.NameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,4 +38,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         StandardError errorBody = new StandardError(Instant.now(), status, errorMessage, e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(errorBody);
     }
+
+    @ExceptionHandler(BusinessException.class)
+    private ResponseEntity<StandardError> businessExceptionHandler(BusinessException e, HttpServletRequest request) {
+        String errorMessage = "BUSINESS EXCEPTION";
+        HttpStatus status = e.getStatus();
+        StandardError errorBody = new StandardError(Instant.now(), status, errorMessage, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(errorBody);
+    }
+
 }

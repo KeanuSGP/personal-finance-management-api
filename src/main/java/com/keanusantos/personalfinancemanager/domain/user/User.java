@@ -1,8 +1,10 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
+import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -27,6 +29,9 @@ public class User {
     @NotBlank(message = "A senha não pode ficar em branco")
     @Size(min = 4, max = 6)
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private List<FinancialAccount> financialAccountList;
 
     public User() {
     }
