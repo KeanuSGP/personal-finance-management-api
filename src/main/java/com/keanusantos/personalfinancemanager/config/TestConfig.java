@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.config;
 
+import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
+import com.keanusantos.personalfinancemanager.domain.counterparty.CounterPartyRepository;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountRepository;
 import com.keanusantos.personalfinancemanager.domain.user.User;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
 
 import java.util.Arrays;
 
@@ -20,6 +23,9 @@ public class TestConfig implements CommandLineRunner {
 
     @Autowired
     private FinancialAccountRepository finAccRepository;
+
+    @Autowired
+    private CounterPartyRepository counterPartyRepository;
 
 
     @Override
@@ -38,5 +44,10 @@ public class TestConfig implements CommandLineRunner {
         FinancialAccount finAcc6 = new FinancialAccount(null, "Account 6", 10000f, user2);
 
         finAccRepository.saveAll(Arrays.asList(finAcc1, finAcc2, finAcc3, finAcc4, finAcc5, finAcc6));
+
+        CounterParty counterP1 = new CounterParty(null, "CounterParty1", "12345678912345");
+        CounterParty counterP2 = new CounterParty(null, "CounterParty2", "9876543");
+
+        counterPartyRepository.saveAll(Arrays.asList(counterP1, counterP2));
     }
 }

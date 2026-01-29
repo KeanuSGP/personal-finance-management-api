@@ -23,7 +23,6 @@ public class UserService {
         return user.orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
-
     public User insert(User obj) {
         if (repository.existsByName(obj.getName())) {
             throw new NameAlreadyExistsException();
@@ -35,13 +34,6 @@ public class UserService {
         return repository.save(obj);
     }
 
-    private String formatErrorMessage(List<String> list) {
-        StringBuilder sb = new StringBuilder();
-        for(String a: list) {
-            sb.append(a);
-        }
-        return sb.toString();
-    }
 
     public User update(Long id, User obj) {
             User entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));

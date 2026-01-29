@@ -15,7 +15,6 @@ public class User {
     private Long id;
 
     @NotEmpty(message = "O nome deve ser preenchido")
-    @NotBlank(message = "O nome não pode ficar em branco")
     @Size(min = 3, max = 10)
     @Column(unique=true)
     private String name;
