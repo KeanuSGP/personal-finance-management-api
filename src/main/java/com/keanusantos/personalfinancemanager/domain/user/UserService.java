@@ -1,9 +1,9 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
+import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
-import com.keanusantos.personalfinancemanager.domain.user.exception.EmailAlreadyExistsException;
-import com.keanusantos.personalfinancemanager.domain.user.exception.NameAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,13 +24,7 @@ public class UserService {
     }
 
     public User insert(User obj) {
-        if (repository.existsByName(obj.getName())) {
-            throw new NameAlreadyExistsException();
-        }
-
-        if (repository.existsByEmail(obj.getEmail())) {
-            throw new EmailAlreadyExistsException();
-        }
+        validateUser(obj);
         return repository.save(obj);
     }
 
@@ -42,9 +36,21 @@ public class UserService {
     }
 
     private void updateUserData(User entity, User obj) {
+        validateUser(obj);
+
         entity.setName(obj.getName());
         entity.setEmail(obj.getEmail());
         entity.setPassword(obj.getPassword());
+    }
+
+    public void validateUser(User obj) {
+        if (repository.existsByName(obj.getName())) {
+            throw new BusinessException("Name already in use", HttpStatus.CONFLICT);
+        }
+
+        if (repository.existsByEmail(obj.getEmail())) {
+            throw new BusinessException("Email already in use", HttpStatus.CONFLICT);
+        }
     }
 
     public void delete(Long id) {
@@ -53,6 +59,7 @@ public class UserService {
         }
         repository.deleteById(id);
     }
+
 
 
 }
