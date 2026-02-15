@@ -4,15 +4,23 @@ import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterPartyRepository;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountRepository;
+import com.keanusantos.personalfinancemanager.domain.transaction.Installment;
+import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
+import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
+import com.keanusantos.personalfinancemanager.domain.transaction.TransactionRepository;
+import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.util.*;
+
 
 @Configuration
 @Profile("test")
@@ -26,6 +34,9 @@ public class TestConfig implements CommandLineRunner {
 
     @Autowired
     private CounterPartyRepository counterPartyRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
 
     @Override
@@ -49,5 +60,18 @@ public class TestConfig implements CommandLineRunner {
         CounterParty counterP2 = new CounterParty(null, "CounterParty2", "9876543");
 
         counterPartyRepository.saveAll(Arrays.asList(counterP1, counterP2));
+
+        Transaction t1 = new Transaction(null, "12311", LocalDate.now(), TransactionType.DEBIT, "ssss", new ArrayList<>(), counterP1, finAcc1);
+
+
+        Installment installment1 = new Installment(null, 1, 200.0f, LocalDate.now(), InstallmentStatus.PENDING, t1);
+        Installment installment2 = new Installment(null, 2, 200.0f, LocalDate.now(), InstallmentStatus.PENDING, t1);
+        Installment installment3 = new Installment(null, 3, 200.0f, LocalDate.now(), InstallmentStatus.PENDING, t1);
+
+        t1.addInstallment(installment1);
+        t1.addInstallment(installment2);
+        t1.addInstallment(installment3);
+
+        transactionRepository.save(t1);
     }
 }
