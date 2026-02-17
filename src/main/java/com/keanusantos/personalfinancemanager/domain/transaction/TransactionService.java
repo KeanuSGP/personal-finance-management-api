@@ -14,7 +14,6 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.tra
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
-import com.keanusantos.personalfinancemanager.exception.EmptyArgumentException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,7 +201,7 @@ public class TransactionService {
 
         installment.parcialUpdateData(newData);
         repository.save(transaction);
-        return InstallmentDTOMapper.toUpdateInstallmentDTO(installment);
+        return InstallmentDTOMapper.installmentToPatchDTO(installment);
     }
 
     public void delete(Long id) {
