@@ -57,8 +57,8 @@ public class TransactionController {
     }
 
     @PatchMapping(value = "/{transactionId}/installment/{installmentId}")
-    public PatchInstallmentDTO parcialUpdateInstallment(@PathVariable Long transactionId, @PathVariable Long installmentId, @RequestBody PatchInstallmentDTO obj) {
-        return service.parcialUpdateInstallment(transactionId, installmentId, obj);
+    public PatchInstallmentDTO partialUpdateInstallment(@PathVariable Long transactionId, @PathVariable Long installmentId, @Valid @RequestBody PatchInstallmentDTO obj) {
+        return service.partialUpdateInstallment(transactionId, installmentId, obj);
     }
 
     @DeleteMapping(value = "/{id}")
