@@ -1,7 +1,10 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
+import com.keanusantos.personalfinancemanager.exception.BusinessException;
+import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +25,7 @@ public class CategoryService {
     }
 
     public Category insert(Category obj) {
+        validateData(obj, null);
         return repository.save(obj);
     }
 
@@ -32,6 +36,7 @@ public class CategoryService {
     }
 
     private void updateData(Category category, Category obj) {
+        validateData(obj, category.getId());
         category.setName(obj.getName());
         category.setColor(obj.getColor());
     }
@@ -41,6 +46,25 @@ public class CategoryService {
             throw new ResourceNotFoundException(id);
         }
         repository.deleteById(id);
+    }
+
+    private void validateData(Category obj, Long id) {
+        if (repository.existsByNameAndIdNot(obj.getName(), id)) {
+            throw new ResourceAlreadyExistsException("Category already exists");
+        }
+
+        if (repository.existsByColorAndIdNot(obj.getColor(), id)) {
+            throw new BusinessException("Categories must have different colors", HttpStatus.CONFLICT);
+        }
+
+        if (repository.existsByName(obj.getName())) {
+            throw new ResourceAlreadyExistsException("Category already exists");
+        }
+
+        if (repository.existsByColor(obj.getColor())) {
+            throw new BusinessException("Categories must have different colors", HttpStatus.CONFLICT);
+        }
+
     }
 
 }
