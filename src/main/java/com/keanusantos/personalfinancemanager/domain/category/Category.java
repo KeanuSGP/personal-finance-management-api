@@ -1,9 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
@@ -23,7 +20,7 @@ public class Category {
     @Size(min = 6, max = 6)
     private String color;
 
-    public Category(){};
+    public Category(){}
 
     public Category(Long id, String name, String color) {
         this.id = id;
