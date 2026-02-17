@@ -115,6 +115,19 @@ public class TransactionService {
         return TransactionDTOMapper.toResponse(transaction);
     }
 
+    private void putUpdateTransaction(Transaction transaction, PutTransactionDTO newData) {
+        if (repository.existsByDocAndIdNot(newData.doc(), transaction.getId())) {
+            throw new ResourceAlreadyExistsException("The transaction already exists in the system");
+        }
+        transaction.setDoc(newData.doc());
+        transaction.setIssueDate(newData.issueDate());
+        transaction.setType(newData.type());
+        transaction.setDescription(newData.description());
+        transaction.setCounterparty(counterPService.findById(newData.counterParty()));
+        transaction.setFinancialAccount(finAccService.findById(newData.financialAccount()));
+
+    }
+
     public PutInstallmentDTO putUpdateInstallment(Long transactionId, Long id, PutInstallmentDTO installmentDTO) {
         Transaction t = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
         Installment i = t.getInstallments().stream().filter(c -> c.getId() == id).findFirst().orElseThrow(() -> new ResourceNotFoundException(id));
