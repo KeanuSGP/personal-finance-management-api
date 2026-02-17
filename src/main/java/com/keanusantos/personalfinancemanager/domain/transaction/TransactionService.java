@@ -119,18 +119,18 @@ public class TransactionService {
         Transaction t = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
         Installment i = t.getInstallments().stream().filter(c -> c.getId() == id).findFirst().orElseThrow(() -> new ResourceNotFoundException(id));
 
-        if (installmentDTO.installmentNumber() < 0) {
+        for (Installment a : t.getInstallments()) {
+            if (a.getInstallmentNumber() == installmentDTO.installmentNumber() && a.getId() != i.getId()) {
+                throw new BusinessException("This installment number already exists: " + installmentDTO.installmentNumber(), HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        if (installmentDTO.installmentNumber() <= 0) {
             throw new BusinessException("The number of the installments cannot be less than 1", HttpStatus.BAD_REQUEST);
         }
 
-        if (installmentDTO.amount() == null) {
-            throw new EmptyArgumentException("amount");
-        }
-        if (installmentDTO.dueDate() == null) {
-            throw new EmptyArgumentException("dueDate");
-        }
-        if (installmentDTO.status() == null) {
-            throw new EmptyArgumentException("status");
+        if (installmentDTO.amount() < 0) {
+            throw new BusinessException("The price cannot be less than zero", HttpStatus.BAD_REQUEST);
         }
 
         i.putUpdateData(installmentDTO);
@@ -138,74 +138,58 @@ public class TransactionService {
         return InstallmentDTOMapper.toPutInstallmentDTO(i);
     }
 
-    private void putUpdateTransaction(Transaction transaction, PutTransactionDTO newData) {
-        if (repository.existsByDocAndIdNot(newData.doc(), transaction.getId())) {
-            throw new ResourceAlreadyExistsException("The transaction already exists in the system");
-        }
-        transaction.setDoc(newData.doc());
-        transaction.setIssueDate(newData.issueDate());
-        transaction.setType(newData.type());
-        transaction.setDescription(newData.description());
-        transaction.setCounterparty(counterPService.findById(newData.counterParty()));
-        transaction.setFinancialAccount(finAccService.findById(newData.financialAccount()));
-
-    }
-
 
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
+        Transaction t = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
 
-        Transaction transaction = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-
-        if (repository.existsByDocAndIdNot(newData.doc(), transaction.getId())) {
+        if (repository.existsByDocAndIdNot(newData.doc(), t.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
 
         if (newData.doc() != null) {
-            transaction.setDoc(newData.doc());
+            t.setDoc(newData.doc());
         }
 
         if (newData.issueDate() != null) {
-            transaction.setIssueDate(newData.issueDate());
+            t.setIssueDate(newData.issueDate());
         }
 
         if (newData.type() != null) {
-            transaction.setType(newData.type());
+            t.setType(newData.type());
         }
 
         if (newData.description() != null) {
-            transaction.setDescription(newData.description());
+            t.setDescription(newData.description());
         }
 
         if (newData.counterParty() != null) {
             CounterParty counterP = counterPService.findById(newData.counterParty());
-            transaction.setCounterparty(counterP);
+            t.setCounterparty(counterP);
         }
 
         if (newData.financialAccount() != null) {
             FinancialAccount finAcc = finAccService.findById(newData.financialAccount());
-            transaction.setFinancialAccount(finAcc);
+            t.setFinancialAccount(finAcc);
         }
 
-        repository.save(transaction);
-        return TransactionDTOMapper.toResponse(transaction);
+        repository.save(t);
+        return TransactionDTOMapper.toResponse(t);
 
     }
 
-    public PatchInstallmentDTO parcialUpdateInstallment(Long transactionId, Long installmentId, PatchInstallmentDTO newData) {
+    public PatchInstallmentDTO partialUpdateInstallment(Long transactionId, Long installmentId, PatchInstallmentDTO newData) {
         Transaction transaction = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
         Installment installment = transaction.getInstallments().stream().filter(a -> a.getId().equals(installmentId)).findFirst().orElseThrow(() -> new ResourceNotFoundException(installmentId));
 
-        transaction.getInstallments().forEach(a -> {
-            if (a.getInstallmentNumber() == installment.getInstallmentNumber() && a.getId() != installmentId) {
-                throw new ResourceAlreadyExistsException("An installment of this number already exists: " + a.getInstallmentNumber());
+        for (Installment a : transaction.getInstallments()) {
+            if (a.getInstallmentNumber() == newData.installmentNumber() && a.getId() != installmentId) {
+                throw new BusinessException("This installment number already exists: " + newData.installmentNumber(), HttpStatus.BAD_REQUEST);
             }
-        });
+        }
 
         installment.parcialUpdateData(newData);
         repository.save(transaction);
-
         return InstallmentDTOMapper.toUpdateInstallmentDTO(installment);
-
     }
 
     public void delete(Long id) {
