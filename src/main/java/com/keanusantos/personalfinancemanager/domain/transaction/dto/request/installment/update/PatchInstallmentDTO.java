@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record PatchInstallmentDTO(
-        @NotNull Long id,
         Integer installmentNumber,
         Float amount,
         LocalDate dueDate,
