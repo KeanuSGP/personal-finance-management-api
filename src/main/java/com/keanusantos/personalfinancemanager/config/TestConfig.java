@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.config;
 
+import com.keanusantos.personalfinancemanager.domain.category.Category;
+import com.keanusantos.personalfinancemanager.domain.category.CategoryRepository;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterPartyRepository;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
@@ -38,6 +40,9 @@ public class TestConfig implements CommandLineRunner {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -73,5 +78,11 @@ public class TestConfig implements CommandLineRunner {
         t1.addInstallment(installment3);
 
         transactionRepository.save(t1);
+
+        Category c1 = new Category(null, "Alimento", "ffffff");
+        Category c2 = new Category(null, "Roupa", "000000");
+        Category c3 = new Category(null, "Despesas gerais", "555555");
+
+        categoryRepository.saveAll(Arrays.asList(c1, c2, c3));
     }
 }
