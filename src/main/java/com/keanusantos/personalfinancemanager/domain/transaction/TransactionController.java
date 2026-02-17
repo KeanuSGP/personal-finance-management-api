@@ -47,7 +47,7 @@ public class TransactionController {
     }
 
     @PutMapping(value = "/{transactionId}/installment/{installmentId}")
-    public PutInstallmentDTO putUpdateInstallment(@PathVariable Long transactionId, @PathVariable Long installmentId, @RequestBody PutInstallmentDTO obj) {
+    public PutInstallmentDTO putUpdateInstallment(@PathVariable Long transactionId, @PathVariable Long installmentId, @Valid @RequestBody PutInstallmentDTO obj) {
         return service.putUpdateInstallment(transactionId, installmentId, obj);
     }
 
