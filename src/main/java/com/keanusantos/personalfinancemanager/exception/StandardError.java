@@ -3,6 +3,7 @@ package com.keanusantos.personalfinancemanager.exception;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class StandardError {
 
@@ -15,7 +16,7 @@ public class StandardError {
     public StandardError(){};
 
     public StandardError(Instant timestamp, HttpStatus status, String error, String message, String path) {
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.truncatedTo(ChronoUnit.SECONDS);
         this.status = status;
         this.error = error;
         this.message = message;
