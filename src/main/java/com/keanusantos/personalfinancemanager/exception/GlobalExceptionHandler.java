@@ -68,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
         String error = "Argument Not Valid";
         HttpStatus status = HttpStatus.valueOf(statusCode.value());
-        String message = "Teste";
+        String message = "There is an error in the data sent";
 
         if (e.getCause() instanceof InvalidFormatException cause) {
             String path = cause.getValue().toString() + " is not a valid value";
