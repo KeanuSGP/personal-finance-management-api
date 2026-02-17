@@ -2,7 +2,6 @@ package com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper;
 
 import com.keanusantos.personalfinancemanager.domain.transaction.Installment;
 import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
-import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.create.CreateInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 
@@ -31,9 +30,8 @@ public class InstallmentDTOMapper {
         );
     }
 
-    public static PatchInstallmentDTO toUpdateInstallmentDTO(Installment installment) {
+    public static PatchInstallmentDTO installmentToPatchDTO(Installment installment) {
         return new PatchInstallmentDTO(
-                installment.getId(),
                 installment.getInstallmentNumber(),
                 installment.getAmount(),
                 installment.getDueDate(),
