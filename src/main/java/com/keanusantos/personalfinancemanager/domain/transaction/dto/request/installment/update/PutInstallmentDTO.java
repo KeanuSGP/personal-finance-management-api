@@ -1,4 +1,4 @@
-package com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment;
+package com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update;
 
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import jakarta.validation.constraints.Min;
