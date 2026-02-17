@@ -1,7 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.PutInstallmentDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import jakarta.persistence.*;

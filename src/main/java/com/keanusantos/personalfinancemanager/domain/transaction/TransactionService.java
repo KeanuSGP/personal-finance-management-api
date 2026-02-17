@@ -6,7 +6,7 @@ import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialA
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountService;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper.InstallmentDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper.TransactionDTOMapper;
-import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.PutInstallmentDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.CreateTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.create.CreateInstallmentDTO;
@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -94,14 +93,12 @@ public class TransactionService {
 
         for (CreateInstallmentDTO dto: list) {
             installmentNumber++;
-            PatchInstallmentDTO completeDTO = new PatchInstallmentDTO(
-                    null,
-                    installmentNumber,
-                    dto.amount(),
-                    dto.dueDate(),
-                    dto.status()
-            );
-            Installment installment = InstallmentDTOMapper.updateDTOtoInstallment(completeDTO, transaction);
+            Installment installment = new Installment();
+            installment.setAmount(dto.amount());
+            installment.setInstallmentNumber(installmentNumber);
+            installment.setDueDate(dto.dueDate());
+            installment.setStatus(dto.status());
+            installment.setTransaction(transaction);
             installments.add(installment);
         }
 

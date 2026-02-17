@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
-import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.PutInstallmentDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.CreateTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PutTransactionDTO;
