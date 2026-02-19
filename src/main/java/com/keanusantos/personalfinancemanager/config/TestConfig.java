@@ -66,7 +66,19 @@ public class TestConfig implements CommandLineRunner {
 
         counterPartyRepository.saveAll(Arrays.asList(counterP1, counterP2));
 
-        Transaction t1 = new Transaction(null, "12311", LocalDate.now(), TransactionType.DEBIT, "ssss", new ArrayList<>(), counterP1, finAcc1);
+        Category c1 = new Category(null, "Alimento", "ffffff");
+        Category c2 = new Category(null, "Roupa", "000000");
+        Category c3 = new Category(null, "Despesas gerais", "555555");
+
+        categoryRepository.saveAll(Arrays.asList(c1, c2, c3));
+
+        Set<Category> categories = new HashSet<>();
+
+        categories.add(c1);
+        categories.add(c2);
+        categories.add(c3);
+
+        Transaction t1 = new Transaction(null, "12311", LocalDate.now(), TransactionType.DEBIT, "ssss", categories, new ArrayList<>(), counterP1, finAcc1);
 
 
         Installment installment1 = new Installment(null, 1, 200.0f, LocalDate.now(), InstallmentStatus.PENDING, t1);
@@ -79,10 +91,5 @@ public class TestConfig implements CommandLineRunner {
 
         transactionRepository.save(t1);
 
-        Category c1 = new Category(null, "Alimento", "ffffff");
-        Category c2 = new Category(null, "Roupa", "000000");
-        Category c3 = new Category(null, "Despesas gerais", "555555");
-
-        categoryRepository.saveAll(Arrays.asList(c1, c2, c3));
     }
 }
