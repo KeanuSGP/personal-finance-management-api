@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
+import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
@@ -32,6 +33,9 @@ public class Transaction {
 
     private String description;
 
+    @OneToMany
+    private Set<Category> category;
+
     @NotNull(message = "The account cannot be created without an installment")
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Installment> installments;
@@ -43,16 +47,16 @@ public class Transaction {
     @NotNull(message = "Define the transaction account")
     @ManyToOne
     private FinancialAccount financialAccount;
-    // inserir atributo "category" quando a entidade for criada
 
     public Transaction(){};
 
-    public Transaction(Long id, String doc, LocalDate issueDate, TransactionType type, String description, List<Installment> installments, CounterParty counterparty, FinancialAccount financialAccount) {
+    public Transaction(Long id, String doc, LocalDate issueDate, TransactionType type, String description, Set<Category> category, List<Installment> installments, CounterParty counterparty, FinancialAccount financialAccount) {
         this.id = id;
         this.doc = doc;
         this.issueDate = issueDate;
         this.type = type;
         this.description = description;
+        this.category = category;
         this.installments = installments;
         this.counterparty = counterparty;
         this.financialAccount = financialAccount;
@@ -96,6 +100,14 @@ public class Transaction {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<Category> getCategory() {
+        return category;
+    }
+
+    public void setCategory(Set<Category> category) {
+        this.category = category;
     }
 
     public List<Installment> getInstallments() {
