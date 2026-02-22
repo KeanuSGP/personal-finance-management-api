@@ -19,15 +19,13 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        Optional<User> user = repository.findById(id);
-        return user.orElseThrow(() -> new ResourceNotFoundException(id));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
     public User insert(User obj) {
         validateUser(obj);
         return repository.save(obj);
     }
-
 
     public User update(Long id, User obj) {
             User entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
