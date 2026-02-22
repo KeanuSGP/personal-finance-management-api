@@ -17,15 +17,12 @@ public class FinancialAccount {
     private Long id;
 
     @Column(unique = true, name = "account_name")
-    @NotEmpty(message = "The name must be filled in")
     private String name;
 
-    @Min(0)
     private Float balance;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @NotNull(message = "Define a user for the account")
     private User user;
 
     public FinancialAccount(){

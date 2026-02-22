@@ -1,7 +1,12 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
+import com.keanusantos.personalfinancemanager.domain.category.dto.mapper.CategoryDTOMapper;
+import com.keanusantos.personalfinancemanager.domain.category.dto.request.CreateCategoryDTO;
+import com.keanusantos.personalfinancemanager.domain.category.dto.request.PutCategoryDTO;
+import com.keanusantos.personalfinancemanager.domain.category.dto.response.CategoryResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserService;
+import com.keanusantos.personalfinancemanager.domain.user.dto.mapper.UserDTOMapper;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
@@ -10,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -21,31 +27,56 @@ public class CategoryService {
     private UserService userService;
 
 
-    public List<Category> findAll() {
-        return repository.findAll();
-    }
-
-    public Category findById(Long id) {
+    public Category findByIdEntity(Long id) {
         return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
-    public Category insert(Category obj) {
-        validateData(obj, null);
-        User user = userService.findById(obj.getUser().getId());
-        obj.setUser(user);
-        return repository.save(obj);
+    public List<CategoryResponseDTO> findAll() {
+        return repository.findAll().stream().map(CategoryDTOMapper::toResponseDTO).collect(Collectors.toList());
     }
 
-    public Category update(Long id, Category obj) {
+    public CategoryResponseDTO findById(Long id) {
+        return CategoryDTOMapper.toResponseDTO(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id)));
+    }
+
+    public CategoryResponseDTO insert(CreateCategoryDTO obj) {
+        User user = userService.findByIdEntity(obj.user());
+        Category category = CategoryDTOMapper.toEntity(obj, user);
+
+        if (repository.existsByName(obj.name())) {
+            throw new ResourceAlreadyExistsException("Name " + obj.name() + " already exists");
+        }
+
+        if (repository.existsByColor(obj.color())) {
+            throw new ResourceAlreadyExistsException("Color " + obj.color() + " already exists");
+        }
+
+        repository.save(category);
+        return CategoryDTOMapper.toResponseDTO(category);
+    }
+
+    public CategoryResponseDTO update(Long id, PutCategoryDTO obj) {
         Category category = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
         updateData(category, obj);
-        return repository.save(category);
+        repository.save(category);
+        return CategoryDTOMapper.toResponseDTO(category);
     }
 
-    private void updateData(Category category, Category obj) {
-        validateData(obj, category.getId());
-        category.setName(obj.getName());
-        category.setColor(obj.getColor());
+    private void updateData(Category category, PutCategoryDTO obj) {
+
+        if (repository.existsByNameAndIdNot(obj.name(), category.getId())) {
+            throw new ResourceAlreadyExistsException("Category already exists");
+        }
+
+        if (repository.existsByColorAndIdNot(obj.color(), category.getId())) {
+            throw new ResourceAlreadyExistsException("Color " + obj.color() + " already exists");
+        }
+
+        User user =  userService.findByIdEntity(obj.user());
+
+        category.setName(obj.name());
+        category.setColor(obj.color());
+        category.setUser(user);
     }
 
     public void delete(Long id) {
@@ -55,23 +86,5 @@ public class CategoryService {
         repository.deleteById(id);
     }
 
-    private void validateData(Category obj, Long id) {
-        if (repository.existsByNameAndIdNot(obj.getName(), id)) {
-            throw new ResourceAlreadyExistsException("Category already exists");
-        }
-
-        if (repository.existsByColorAndIdNot(obj.getColor(), id)) {
-            throw new BusinessException("Categories must have different colors", HttpStatus.CONFLICT);
-        }
-
-        if (repository.existsByName(obj.getName())) {
-            throw new ResourceAlreadyExistsException("Category already exists");
-        }
-
-        if (repository.existsByColor(obj.getColor())) {
-            throw new BusinessException("Categories must have different colors", HttpStatus.CONFLICT);
-        }
-
-    }
 
 }

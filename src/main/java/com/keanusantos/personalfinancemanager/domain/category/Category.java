@@ -15,12 +15,9 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "The name must be filled in")
     @Column(name = "category_name")
     private String name;
 
-    @NotEmpty(message = "The color must be filled in")
-    @Size(min = 6, max = 6)
     @Column(name = "color_hex")
     private String color;
 

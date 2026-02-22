@@ -1,5 +1,8 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
+import com.keanusantos.personalfinancemanager.domain.category.dto.request.CreateCategoryDTO;
+import com.keanusantos.personalfinancemanager.domain.category.dto.request.PutCategoryDTO;
+import com.keanusantos.personalfinancemanager.domain.category.dto.response.CategoryResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,22 +17,22 @@ public class CategoryController {
     CategoryService service;
 
     @GetMapping
-    public List<Category> findAll() {
+    public List<CategoryResponseDTO> findAll() {
         return service.findAll();
     }
 
     @GetMapping(value = "/{id}")
-    public Category findById(@PathVariable Long id) {
+    public CategoryResponseDTO findById(@PathVariable Long id) {
         return service.findById(id);
     }
 
     @PostMapping
-    public Category insert(@Valid @RequestBody Category obj) {
+    public CategoryResponseDTO insert(@Valid @RequestBody CreateCategoryDTO obj) {
         return service.insert(obj);
     }
 
     @PutMapping(value = "/{id}")
-    public Category update(@PathVariable Long id, @Valid @RequestBody Category obj) {
+    public CategoryResponseDTO update(@PathVariable Long id, @Valid @RequestBody PutCategoryDTO obj) {
         return service.update(id, obj);
     }
 

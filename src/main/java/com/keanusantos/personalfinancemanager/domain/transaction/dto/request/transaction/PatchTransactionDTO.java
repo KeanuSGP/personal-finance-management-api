@@ -11,10 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public record PatchTransactionDTO(
-        @Size(min = 3) String doc,
+        @Size(min = 3, max = 20, message = "Doc must be between 3 and 20 characters long") String doc,
         LocalDate issueDate,
         @Enumerated(EnumType.STRING) TransactionType type,
-        String description,
+        @Size(min = 3, message = "Description must have at least 3 characters long") String description,
         Set<Long> categories,
         Long counterParty,
         Long financialAccount,

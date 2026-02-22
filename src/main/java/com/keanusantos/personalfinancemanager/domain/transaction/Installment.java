@@ -99,7 +99,7 @@ public class Installment {
             this.status = installment.status();
     }
 
-    public void parcialUpdateData(PatchInstallmentDTO installment) {
+    public void partialUpdateData(PatchInstallmentDTO installment) {
         if (installment.amount() != null) {
             this.amount = installment.amount();
         }

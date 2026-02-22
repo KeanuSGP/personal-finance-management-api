@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
+import com.keanusantos.personalfinancemanager.domain.user.dto.request.CreateUserDTO;
+import com.keanusantos.personalfinancemanager.domain.user.dto.request.PutUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.response.UserResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,12 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO insert(@Valid @RequestBody User obj) {
+    public UserResponseDTO insert(@Valid @RequestBody CreateUserDTO obj) {
         return service.insert(obj);
     }
 
     @PutMapping(value = "/{id}")
-    public UserResponseDTO update(@PathVariable Long id, @RequestBody User obj) {
+    public UserResponseDTO update(@PathVariable Long id, @RequestBody @Valid PutUserDTO obj) {
         return service.update(id, obj);
     }
 

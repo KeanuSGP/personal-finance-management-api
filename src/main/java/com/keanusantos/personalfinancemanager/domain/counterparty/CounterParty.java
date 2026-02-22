@@ -16,17 +16,13 @@ public class CounterParty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "The name must be filled in")
     @Column(name = "legal_name")
     private String name;
 
-    @NotEmpty(message = "The Tax ID must be filled in")
-    @Size(max = 14)
     private String taxId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @NotNull(message = "The counterpart must belong to a user")
     private User user;
 
     public CounterParty() {

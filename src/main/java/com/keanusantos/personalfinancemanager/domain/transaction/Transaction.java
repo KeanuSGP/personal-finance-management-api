@@ -3,17 +3,21 @@ package com.keanusantos.personalfinancemanager.domain.transaction;
 import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.domain.user.User;
+import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.w3c.dom.css.Counter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table (name = "transactions")
@@ -23,16 +27,13 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, name = "transaction_doc")
-    @NotEmpty(message = "The document cannot be empty")
+    @Column(name = "transaction_doc")
     private String doc;
 
-    @NotNull(message = "The date cannot be null")
     private LocalDate issueDate;
 
-    @NotNull(message = "Define the type for transaction")
-    @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type")
+    @Enumerated(EnumType.STRING)
     private TransactionType type;
 
     @Column(name = "transaction_description")
@@ -42,18 +43,14 @@ public class Transaction {
     @JoinTable(name = "transaction_category",
             joinColumns = @JoinColumn(name = "transaction_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
-    @NotEmpty(message = "Transaction must have at least one category")
     private Set<Category> categories;
 
-    @NotNull(message = "The account cannot be created without an installment")
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Installment> installments;
 
-    @NotNull(message = "Define the counterparty for the transaction")
     @ManyToOne
     private CounterParty counterparty;
 
-    @NotNull(message = "Define the transaction account")
     @ManyToOne
     private FinancialAccount financialAccount;
 
@@ -166,6 +163,42 @@ public class Transaction {
             installment.setTransaction(this);
             installments.add(installment);
         });
+    }
+
+    public void partialUpdateTransaction(Transaction t, PatchTransactionDTO newData, Set<Category> categories, CounterParty counterParty,  FinancialAccount financialAccount, User user) {
+        if (newData.categories() != null) {
+            if (!categories.isEmpty()) {
+                t.setCategories(categories);
+            }
+        }
+
+        if (newData.doc() != null) {
+            t.setDoc(newData.doc());
+        }
+
+        if (newData.issueDate() != null) {
+            t.setIssueDate(newData.issueDate());
+        }
+
+        if (newData.type() != null) {
+            t.setType(newData.type());
+        }
+
+        if (newData.description() != null) {
+            t.setDescription(newData.description());
+        }
+
+        if (newData.counterParty() != null) {
+            t.setCounterparty(counterParty);
+        }
+
+        if (newData.financialAccount() != null) {
+            t.setFinancialAccount(financialAccount);
+        }
+
+        if (newData.user() != null) {
+            t.setUser(user);
+        }
     }
 
     @Override

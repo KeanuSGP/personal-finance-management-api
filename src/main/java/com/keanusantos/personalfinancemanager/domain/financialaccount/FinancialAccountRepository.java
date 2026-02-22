@@ -8,7 +8,7 @@ import java.util.List;
 @Repository
 public interface FinancialAccountRepository extends JpaRepository<FinancialAccount, Long> {
 
-    List<FinancialAccount> findByUserId(Long id);
     Boolean existsByName(String name);
+    Boolean existsByNameAndIdNot(String name, Long id);
 
 }

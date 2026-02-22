@@ -15,6 +15,7 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.ins
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PutTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
@@ -43,6 +44,10 @@ public class TransactionService {
     private UserService userService;
 
 
+    public Transaction findByIdEntity(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+    }
+
     public List<TransactionResponseDTO> findAll(){
         List<Transaction> transactions = repository.findAll();
         List<TransactionResponseDTO> responseList = transactions.stream().map(TransactionDTOMapper::toResponse).toList();
@@ -70,13 +75,13 @@ public class TransactionService {
     }
 
     public TransactionResponseDTO insert(CreateTransactionDTO obj) {
-        CounterParty counterParty = counterPService.findById(obj.counterParty());
-        FinancialAccount financialAccount = finAccService.findById(obj.financialAccount());
-        Set<Category> categories = obj.categories().stream().map(n -> categoryService.findById(n)).collect(Collectors.toSet());
-        User user =  userService.findById(obj.user());
+        CounterParty counterParty = counterPService.findByIdEntity(obj.counterParty());
+        FinancialAccount financialAccount = finAccService.findByIdEntity(obj.financialAccount());
+        Set<Category> categories = obj.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
+        User user =  userService.findByIdEntity(obj.user());
 
         if (repository.existsByDoc(obj.doc())) {
-            throw new ResourceAlreadyExistsException("A transaction already exists with this document");
+            throw new ResourceAlreadyExistsException("Document already exists: " +  obj.doc());
         };
 
         Transaction transaction = TransactionDTOMapper.toTransaction(obj, categories, counterParty, financialAccount, user);
@@ -110,7 +115,7 @@ public class TransactionService {
             installment.setAmount(dto.amount());
             installment.setInstallmentNumber(installmentNumber);
             installment.setDueDate(dto.dueDate());
-            installment.setStatus(dto.status());
+            installment.setStatus(InstallmentStatus.PENDING);
             installment.setTransaction(transaction);
             installments.add(installment);
         }
@@ -120,9 +125,7 @@ public class TransactionService {
 
     public TransactionResponseDTO update(Long id, PutTransactionDTO newData) {
         Transaction transaction = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-
         putUpdateTransaction(transaction, newData);
-
         repository.save(transaction);
 
         return TransactionDTOMapper.toResponse(transaction);
@@ -133,10 +136,10 @@ public class TransactionService {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
 
-        CounterParty counterParty = counterPService.findById(newData.counterParty());
-        FinancialAccount financialAccount = finAccService.findById(newData.financialAccount());
-        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findById(n)).collect(Collectors.toSet());
-        User user =  userService.findById(newData.user());
+        CounterParty counterParty = counterPService.findByIdEntity(newData.counterParty());
+        FinancialAccount financialAccount = finAccService.findByIdEntity(newData.financialAccount());
+        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
+        User user =  userService.findByIdEntity(newData.user());
 
         transaction.setDoc(newData.doc());
         transaction.setIssueDate(newData.issueDate());
@@ -151,20 +154,12 @@ public class TransactionService {
 
     public PutInstallmentDTO putUpdateInstallment(Long transactionId, Long id, PutInstallmentDTO installmentDTO) {
         Transaction t = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
-        Installment i = t.getInstallments().stream().filter(c -> c.getId() == id).findFirst().orElseThrow(() -> new ResourceNotFoundException(id));
+        Installment i = t.getInstallments().stream().filter(c -> c.getId().equals(id)).findFirst().orElseThrow(() -> new ResourceNotFoundException(id));
 
-        for (Installment a : t.getInstallments()) {
-            if (a.getInstallmentNumber() == installmentDTO.installmentNumber() && a.getId() != i.getId()) {
-                throw new BusinessException("This installment number already exists: " + installmentDTO.installmentNumber(), HttpStatus.BAD_REQUEST);
-            }
-        }
+        boolean exists = t.getInstallments().stream().anyMatch(c -> !c.getId().equals(id) && c.getInstallmentNumber().equals(installmentDTO.installmentNumber()));
 
-        if (installmentDTO.installmentNumber() <= 0) {
-            throw new BusinessException("The number of the installments cannot be less than 1", HttpStatus.BAD_REQUEST);
-        }
-
-        if (installmentDTO.amount() < 0) {
-            throw new BusinessException("The price cannot be less than zero", HttpStatus.BAD_REQUEST);
+        if (exists) {
+            throw new BusinessException("This installment number already exists: " + installmentDTO.installmentNumber(), HttpStatus.BAD_REQUEST);
         }
 
         i.putUpdateData(installmentDTO);
@@ -172,49 +167,19 @@ public class TransactionService {
         return InstallmentDTOMapper.toPutInstallmentDTO(i);
     }
 
-
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
         Transaction t = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findById(n)).collect(Collectors.toSet());
+        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
+        CounterParty counterP = counterPService.findByIdEntity(newData.counterParty());
+        FinancialAccount finAcc = finAccService.findByIdEntity(newData.financialAccount());
+        User user = userService.findByIdEntity(newData.user());
 
 
         if (repository.existsByDocAndIdNot(newData.doc(), t.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
 
-        if (newData.doc() != null) {
-            t.setDoc(newData.doc());
-        }
-
-        if (newData.issueDate() != null) {
-            t.setIssueDate(newData.issueDate());
-        }
-
-        if (newData.type() != null) {
-            t.setType(newData.type());
-        }
-
-        if (newData.description() != null) {
-            t.setDescription(newData.description());
-        }
-
-        t.setCategories(categories);
-
-        if (newData.counterParty() != null) {
-            CounterParty counterP = counterPService.findById(newData.counterParty());
-            t.setCounterparty(counterP);
-        }
-
-        if (newData.financialAccount() != null) {
-            FinancialAccount finAcc = finAccService.findById(newData.financialAccount());
-            t.setFinancialAccount(finAcc);
-        }
-
-        if (newData.user() != null) {
-            User user = userService.findById(newData.user());
-            t.setUser(user);
-        }
-
+        t.partialUpdateTransaction(t, newData, categories, counterP, finAcc, user);
         repository.save(t);
         return TransactionDTOMapper.toResponse(t);
 
@@ -224,13 +189,13 @@ public class TransactionService {
         Transaction transaction = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
         Installment installment = transaction.getInstallments().stream().filter(a -> a.getId().equals(installmentId)).findFirst().orElseThrow(() -> new ResourceNotFoundException(installmentId));
 
-        for (Installment a : transaction.getInstallments()) {
-            if (a.getInstallmentNumber() == newData.installmentNumber() && a.getId() != installmentId) {
-                throw new BusinessException("This installment number already exists: " + newData.installmentNumber(), HttpStatus.BAD_REQUEST);
-            }
+        boolean exists = transaction.getInstallments().stream().anyMatch(a -> !a.getId().equals(installmentId) && a.getInstallmentNumber().equals(newData.installmentNumber()));
+
+        if (exists) {
+            throw new BusinessException("This installment number already exists: " + newData.installmentNumber(), HttpStatus.BAD_REQUEST);
         }
 
-        installment.parcialUpdateData(newData);
+        installment.partialUpdateData(newData);
         repository.save(transaction);
         return InstallmentDTOMapper.installmentToPatchDTO(installment);
     }
@@ -244,7 +209,7 @@ public class TransactionService {
 
     public void deleteInstallment(Long tId, Long iId) {
         Transaction t = repository.findById(tId).orElseThrow(() -> new ResourceNotFoundException(tId));
-        Installment i = t.getInstallments().stream().filter(obj -> obj.getId() == iId).findFirst().orElseThrow(() -> new ResourceNotFoundException(iId));
+        Installment i = t.getInstallments().stream().filter(a -> a.getId().equals(iId)).findFirst().orElseThrow(() -> new ResourceNotFoundException(iId));
         t.getInstallments().remove(i);
         repository.save(t);
     }

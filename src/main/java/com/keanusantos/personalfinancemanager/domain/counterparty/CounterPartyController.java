@@ -1,5 +1,8 @@
 package com.keanusantos.personalfinancemanager.domain.counterparty;
 
+import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.CreateCounterPartyDTO;
+import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.PutCounterPartyDTO;
+import com.keanusantos.personalfinancemanager.domain.counterparty.dto.response.CounterPartyResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,23 +18,23 @@ public class CounterPartyController {
     private CounterPartyService service;
 
     @GetMapping
-    public List<CounterParty> findAll() {
+    public List<CounterPartyResponseDTO> findAll() {
         return service.findAll();
     }
 
     @GetMapping(value = "/{id}")
-    public CounterParty findById(@PathVariable Long id) {
+    public CounterPartyResponseDTO findById(@PathVariable Long id) {
         return service.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CounterParty insert(@RequestBody CounterParty obj) {
+    public CounterPartyResponseDTO insert(@RequestBody @Valid CreateCounterPartyDTO obj) {
         return service.insert(obj);
     }
 
     @PutMapping(value = "/{id}")
-    public CounterParty update(@PathVariable Long id, @RequestBody CounterParty obj) {
+    public CounterPartyResponseDTO update(@PathVariable Long id, @RequestBody @Valid PutCounterPartyDTO obj) {
         return service.update(id, obj);
     }
 

@@ -15,27 +15,29 @@ import java.util.List;
 import java.util.Set;
 
 public record CreateTransactionDTO(
-        @Size(min = 3)
-        @NotEmpty(message = "The document cannot be empty")
+        @Size(min = 3, max = 20, message = "Doc must be between 3 and 20 characters long")
+        @NotEmpty(message = "The document must not be null")
         String doc,
 
-        @NotNull(message = "The date cannot be null")
+        @NotNull(message = "The issueDate must not be null")
         LocalDate issueDate,
 
-        @NotNull(message = "Define the type for transaction")
+        @NotNull(message = "The type must not be null")
         @Enumerated(EnumType.STRING)
         TransactionType type,
 
+        @NotEmpty(message = "The description must not be null")
+        @Size(min = 3, message = "Description must have at least 3 characters long")
         String description,
 
-        @Valid Set<Long> categories,
+        @NotEmpty(message = "The categories must not be empty") Set<Long> categories,
 
         @Valid List<CreateInstallmentDTO> installments,
 
-        @NotNull Long counterParty,
+        @NotNull(message = "The counterparty must not be null") Long counterParty,
 
-        @NotNull Long financialAccount,
+        @NotNull(message = "The financial account must not be null") Long financialAccount,
 
-        @NotNull Long user
+        @NotNull(message = "The user must not be null") Long user
 ) {
 }

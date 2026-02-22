@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 public interface CounterPartyRepository extends JpaRepository<CounterParty, Long> {
     boolean existsByName(String name);
     boolean existsByTaxId(String taxId);
+    boolean existsByNameAndIdNot(String name, Long id);
+    boolean existsByTaxIdAndIdNot(String taxId,  Long id);
 }

@@ -1,5 +1,8 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
+import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.CreateAccountDTO;
+import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.PutAccountDTO;
+import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,28 +19,23 @@ public class FinancialAccountController {
     private FinancialAccountService service;
 
     @GetMapping
-    public List<FinancialAccount> findAll() {
+    public List<FinancialAccountResponseDTO> findAll() {
         return service.findAll();
     }
 
     @GetMapping(value = "/{id}")
-    public FinancialAccount findById(@PathVariable Long id) {
+    public FinancialAccountResponseDTO findById(@PathVariable Long id) {
         return service.findById(id);
-    }
-
-    @GetMapping(value = "/user/{id}")
-    public List<FinancialAccount> findByUserId(@PathVariable Long id) {
-        return service.findByUserId(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FinancialAccount insert(@Valid @RequestBody FinancialAccount obj) {
+    public FinancialAccountResponseDTO insert(@Valid @RequestBody CreateAccountDTO obj) {
         return service.insert(obj);
     }
 
     @PutMapping(value = "/{id}")
-    public FinancialAccount update(@PathVariable Long id, @RequestBody FinancialAccount obj) {
+    public FinancialAccountResponseDTO update(@PathVariable Long id, @RequestBody @Valid PutAccountDTO obj) {
         return service.update(id, obj);
     }
 
