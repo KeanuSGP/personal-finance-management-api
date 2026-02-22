@@ -61,14 +61,14 @@ public class TestConfig implements CommandLineRunner {
 
         finAccRepository.saveAll(Arrays.asList(finAcc1, finAcc2, finAcc3, finAcc4, finAcc5, finAcc6));
 
-        CounterParty counterP1 = new CounterParty(null, "CounterParty1", "12345678912345");
-        CounterParty counterP2 = new CounterParty(null, "CounterParty2", "9876543");
+        CounterParty counterP1 = new CounterParty(null, "CounterParty1", "12345678912345", user1);
+        CounterParty counterP2 = new CounterParty(null, "CounterParty2", "9876543", user1);
 
         counterPartyRepository.saveAll(Arrays.asList(counterP1, counterP2));
 
-        Category c1 = new Category(null, "Alimento", "ffffff");
-        Category c2 = new Category(null, "Roupa", "000000");
-        Category c3 = new Category(null, "Despesas gerais", "555555");
+        Category c1 = new Category(null, "Alimento", "ffffff", user1);
+        Category c2 = new Category(null, "Roupa", "000000", user1);
+        Category c3 = new Category(null, "Despesas gerais", "555555", user1);
 
         categoryRepository.saveAll(Arrays.asList(c1, c2, c3));
 
@@ -78,7 +78,7 @@ public class TestConfig implements CommandLineRunner {
         categories.add(c2);
         categories.add(c3);
 
-        Transaction t1 = new Transaction(null, "12311", LocalDate.now(), TransactionType.DEBIT, "ssss", categories, new ArrayList<>(), counterP1, finAcc1);
+        Transaction t1 = new Transaction(null, "12311", LocalDate.now(), TransactionType.DEBIT, "ssss", categories, new ArrayList<>(), counterP1, finAcc1, user1);
 
 
         Installment installment1 = new Installment(null, 1, 200.0f, LocalDate.now(), InstallmentStatus.PENDING, t1);

@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.counterparty;
 
+import com.keanusantos.personalfinancemanager.domain.user.User;
+import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
@@ -13,9 +15,11 @@ import java.util.List;
 @Service
 public class CounterPartyService {
 
-    private static final Logger log = LoggerFactory.getLogger(CounterPartyService.class);
     @Autowired
     private CounterPartyRepository repository;
+
+    @Autowired
+    private UserService userService;
 
     public List<CounterParty> findAll() {
         return repository.findAll();
@@ -27,7 +31,8 @@ public class CounterPartyService {
 
     public CounterParty insert(CounterParty obj) {
         validateCounterParty(obj);
-
+        User user = userService.findById(obj.getUser().getId());
+        obj.setUser(user);
         return repository.save(obj);
     }
 

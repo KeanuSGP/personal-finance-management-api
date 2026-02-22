@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
+import com.keanusantos.personalfinancemanager.domain.user.User;
+import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
@@ -15,6 +17,9 @@ public class CategoryService {
     @Autowired
     CategoryRepository repository;
 
+    @Autowired
+    private UserService userService;
+
 
     public List<Category> findAll() {
         return repository.findAll();
@@ -26,6 +31,8 @@ public class CategoryService {
 
     public Category insert(Category obj) {
         validateData(obj, null);
+        User user = userService.findById(obj.getUser().getId());
+        obj.setUser(user);
         return repository.save(obj);
     }
 

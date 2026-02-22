@@ -4,23 +4,26 @@ import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
+import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
+@Table (name = "transactions")
 public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, name = "transaction_doc")
     @NotEmpty(message = "The document cannot be empty")
     private String doc;
 
@@ -29,12 +32,18 @@ public class Transaction {
 
     @NotNull(message = "Define the type for transaction")
     @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type")
     private TransactionType type;
 
+    @Column(name = "transaction_description")
     private String description;
 
-    @OneToMany
-    private Set<Category> category;
+    @ManyToMany
+    @JoinTable(name = "transaction_category",
+            joinColumns = @JoinColumn(name = "transaction_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @NotEmpty(message = "Transaction must have at least one category")
+    private Set<Category> categories;
 
     @NotNull(message = "The account cannot be created without an installment")
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -48,18 +57,23 @@ public class Transaction {
     @ManyToOne
     private FinancialAccount financialAccount;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public Transaction(){};
 
-    public Transaction(Long id, String doc, LocalDate issueDate, TransactionType type, String description, Set<Category> category, List<Installment> installments, CounterParty counterparty, FinancialAccount financialAccount) {
+    public Transaction(Long id, String doc, LocalDate issueDate, TransactionType type, String description, Set<Category> categories, List<Installment> installments, CounterParty counterparty, FinancialAccount financialAccount, User user) {
         this.id = id;
         this.doc = doc;
         this.issueDate = issueDate;
         this.type = type;
         this.description = description;
-        this.category = category;
+        this.categories = categories != null ? new HashSet<>(categories): new HashSet<>();
         this.installments = installments;
         this.counterparty = counterparty;
         this.financialAccount = financialAccount;
+        this.user = user;
     }
 
     public Long getId() {
@@ -102,12 +116,12 @@ public class Transaction {
         this.description = description;
     }
 
-    public Set<Category> getCategory() {
-        return category;
+    public Set<Category> getCategories() {
+        return categories;
     }
 
-    public void setCategory(Set<Category> category) {
-        this.category = category;
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 
     public List<Installment> getInstallments() {
@@ -117,7 +131,6 @@ public class Transaction {
     public void setInstallments(List<Installment> installments) {
         this.installments = installments;
     }
-
 
     public CounterParty getCounterparty() {
         return counterparty;
@@ -135,6 +148,14 @@ public class Transaction {
         this.financialAccount = financialAccount;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public void addInstallment(Installment installment) {
         installment.setTransaction(this);
         installments.add(installment);
@@ -145,10 +166,6 @@ public class Transaction {
             installment.setTransaction(this);
             installments.add(installment);
         });
-    }
-
-    public void clearInstallmentList() {
-        installments.clear();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
+import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.util.Objects;
 
 @Entity
+@Table(name = "category")
 public class Category {
 
     @Id
@@ -14,18 +16,25 @@ public class Category {
     private Long id;
 
     @NotEmpty(message = "The name must be filled in")
+    @Column(name = "category_name")
     private String name;
 
     @NotEmpty(message = "The color must be filled in")
     @Size(min = 6, max = 6)
+    @Column(name = "color_hex")
     private String color;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public Category(){}
 
-    public Category(Long id, String name, String color) {
+    public Category(Long id, String name, String color, User user) {
         this.id = id;
         this.name = name;
         this.color = color;
+        this.user = user;
     }
 
     public Long getId() {
@@ -51,6 +60,15 @@ public class Category {
     public void setColor(String color) {
         this.color = color;
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
 
     @Override
     public boolean equals(Object o) {

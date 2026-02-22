@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
+@Table (name = "installments")
 public class Installment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +24,7 @@ public class Installment {
     private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
+    @Column (name = "installment_status")
     private InstallmentStatus status;
 
     @NotNull

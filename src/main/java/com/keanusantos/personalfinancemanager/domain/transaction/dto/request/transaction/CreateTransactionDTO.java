@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction;
 
+import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.create.CreateInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import jakarta.persistence.EnumType;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public record CreateTransactionDTO(
         @Size(min = 3)
@@ -26,12 +28,14 @@ public record CreateTransactionDTO(
 
         String description,
 
-        @Valid
-        List<CreateInstallmentDTO> installments,
+        @Valid Set<Long> categories,
 
-        @NotNull
-        Long counterParty,
-        @NotNull
-        Long financialAccount
+        @Valid List<CreateInstallmentDTO> installments,
+
+        @NotNull Long counterParty,
+
+        @NotNull Long financialAccount,
+
+        @NotNull Long user
 ) {
 }

@@ -9,14 +9,15 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
+@Table(name = "financial_accounts")
 public class FinancialAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    @NotEmpty(message = "O nome deve ser preenchido")
+    @Column(unique = true, name = "account_name")
+    @NotEmpty(message = "The name must be filled in")
     private String name;
 
     @Min(0)
@@ -24,7 +25,7 @@ public class FinancialAccount {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @NotNull(message = "Defina um dono para a conta")
+    @NotNull(message = "Define a user for the account")
     private User user;
 
     public FinancialAccount(){

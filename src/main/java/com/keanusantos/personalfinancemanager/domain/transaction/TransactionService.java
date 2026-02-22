@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
+import com.keanusantos.personalfinancemanager.domain.category.Category;
+import com.keanusantos.personalfinancemanager.domain.category.CategoryService;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterPartyService;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
@@ -13,14 +15,18 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.ins
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PutTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
+import com.keanusantos.personalfinancemanager.domain.user.User;
+import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -31,6 +37,10 @@ public class TransactionService {
     private CounterPartyService counterPService;
     @Autowired
     private FinancialAccountService finAccService;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private UserService userService;
 
 
     public List<TransactionResponseDTO> findAll(){
@@ -62,15 +72,19 @@ public class TransactionService {
     public TransactionResponseDTO insert(CreateTransactionDTO obj) {
         CounterParty counterParty = counterPService.findById(obj.counterParty());
         FinancialAccount financialAccount = finAccService.findById(obj.financialAccount());
+        Set<Category> categories = obj.categories().stream().map(n -> categoryService.findById(n)).collect(Collectors.toSet());
+        User user =  userService.findById(obj.user());
 
         if (repository.existsByDoc(obj.doc())) {
             throw new ResourceAlreadyExistsException("A transaction already exists with this document");
         };
 
-        Transaction transaction = TransactionDTOMapper.toTransaction(obj, counterParty, financialAccount);
+        Transaction transaction = TransactionDTOMapper.toTransaction(obj, categories, counterParty, financialAccount, user);
 
         transaction.addListOfInstallments(createInstallments(obj.installments(), transaction));
+
         repository.save(transaction);
+
         return TransactionDTOMapper.toResponse(transaction);
     }
 
@@ -118,12 +132,20 @@ public class TransactionService {
         if (repository.existsByDocAndIdNot(newData.doc(), transaction.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
+
+        CounterParty counterParty = counterPService.findById(newData.counterParty());
+        FinancialAccount financialAccount = finAccService.findById(newData.financialAccount());
+        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findById(n)).collect(Collectors.toSet());
+        User user =  userService.findById(newData.user());
+
         transaction.setDoc(newData.doc());
         transaction.setIssueDate(newData.issueDate());
         transaction.setType(newData.type());
         transaction.setDescription(newData.description());
-        transaction.setCounterparty(counterPService.findById(newData.counterParty()));
-        transaction.setFinancialAccount(finAccService.findById(newData.financialAccount()));
+        transaction.setCategories(categories);
+        transaction.setCounterparty(counterParty);
+        transaction.setFinancialAccount(financialAccount);
+        transaction.setUser(user);
 
     }
 
@@ -153,6 +175,8 @@ public class TransactionService {
 
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
         Transaction t = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findById(n)).collect(Collectors.toSet());
+
 
         if (repository.existsByDocAndIdNot(newData.doc(), t.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
@@ -174,6 +198,8 @@ public class TransactionService {
             t.setDescription(newData.description());
         }
 
+        t.setCategories(categories);
+
         if (newData.counterParty() != null) {
             CounterParty counterP = counterPService.findById(newData.counterParty());
             t.setCounterparty(counterP);
@@ -182,6 +208,11 @@ public class TransactionService {
         if (newData.financialAccount() != null) {
             FinancialAccount finAcc = finAccService.findById(newData.financialAccount());
             t.setFinancialAccount(finAcc);
+        }
+
+        if (newData.user() != null) {
+            User user = userService.findById(newData.user());
+            t.setUser(user);
         }
 
         repository.save(t);
@@ -205,7 +236,7 @@ public class TransactionService {
     }
 
     public void delete(Long id) {
-        if (repository.existsById(id)) {
+        if (!repository.existsById(id)) {
             throw new ResourceNotFoundException(id);
         }
         repository.deleteById(id);

@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
+import com.keanusantos.personalfinancemanager.domain.category.Category;
+import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -16,7 +18,7 @@ public class User {
 
     @NotEmpty(message = "O nome deve ser preenchido")
     @Size(min = 3, max = 10)
-    @Column(unique=true)
+    @Column(unique=true, name = "username")
     private String name;
 
     @NotEmpty(message = "O email deve ser preenchido")
@@ -27,10 +29,8 @@ public class User {
     @NotEmpty(message = "A senha deve ser preenchida")
     @NotBlank(message = "A senha não pode ficar em branco")
     @Size(min = 4, max = 6)
+    @Column(name = "user_password")
     private String password;
-
-    @OneToMany(mappedBy = "user")
-    private List<FinancialAccount> financialAccountList;
 
     public User() {
     }
