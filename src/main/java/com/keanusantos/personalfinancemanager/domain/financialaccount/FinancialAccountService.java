@@ -1,15 +1,12 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
-import com.keanusantos.personalfinancemanager.domain.financialaccount.exception.FinancialAccountAlreadyExists;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 
@@ -62,8 +59,11 @@ public class FinancialAccountService {
             throw new BusinessException("The balance must be equal to or greater than zero", HttpStatus.BAD_REQUEST);
         }
 
+        User user = userService.findById(newData.getUser().getId());
+
         acc.setName(newData.getName());
         acc.setBalance(newData.getBalance());
+        acc.setUser(user);
     }
 
     public void delete(Long id) {
