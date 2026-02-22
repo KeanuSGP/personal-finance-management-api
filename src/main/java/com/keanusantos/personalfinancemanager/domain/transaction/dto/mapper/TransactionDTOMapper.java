@@ -39,7 +39,8 @@ public class TransactionDTOMapper {
                 transaction.getCategories(),
                 transaction.getInstallments(),
                 new CounterPartySummaryDTO(transaction.getCounterparty().getId(), transaction.getCounterparty().getName()),
-                new FinancialAccountSummaryDTO(transaction.getFinancialAccount().getId(), transaction.getFinancialAccount().getName())
+                new FinancialAccountSummaryDTO(transaction.getFinancialAccount().getId(), transaction.getFinancialAccount().getName()),
+                transaction.getUser()
         );
     }
 
