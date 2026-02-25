@@ -5,19 +5,15 @@ import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
+import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.user.User;
-import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import org.w3c.dom.css.Counter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table (name = "transactions")
@@ -101,10 +97,6 @@ public class Transaction {
         return type;
     }
 
-    public void setType(TransactionType type) {
-        this.type = type;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -165,39 +157,34 @@ public class Transaction {
         });
     }
 
-    public void partialUpdateTransaction(Transaction t, PatchTransactionDTO newData, Set<Category> categories, CounterParty counterParty,  FinancialAccount financialAccount, User user) {
-        if (newData.categories() != null) {
-            if (!categories.isEmpty()) {
-                t.setCategories(categories);
-            }
-        }
+    public void partialUpdateTransaction(PatchTransactionDTO newData, CounterParty counterParty,  FinancialAccount financialAccount, User user) {
 
         if (newData.doc() != null) {
-            t.setDoc(newData.doc());
+            this.doc = newData.doc();
         }
 
         if (newData.issueDate() != null) {
-            t.setIssueDate(newData.issueDate());
+            this.issueDate = newData.issueDate();
         }
 
         if (newData.type() != null) {
-            t.setType(newData.type());
+            this.type = newData.type();
         }
 
         if (newData.description() != null) {
-            t.setDescription(newData.description());
+            this.description = newData.description();
         }
 
         if (newData.counterParty() != null) {
-            t.setCounterparty(counterParty);
+            this.counterparty = counterParty;
         }
 
         if (newData.financialAccount() != null) {
-            t.setFinancialAccount(financialAccount);
+            this.financialAccount = financialAccount;
         }
 
         if (newData.user() != null) {
-            t.setUser(user);
+            this.user = user;
         }
     }
 

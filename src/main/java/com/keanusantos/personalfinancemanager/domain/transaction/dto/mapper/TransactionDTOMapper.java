@@ -21,7 +21,6 @@ public class TransactionDTOMapper {
         Transaction transaction =  new Transaction();
         transaction.setDoc(dto.doc());
         transaction.setIssueDate(dto.issueDate());
-        transaction.setType(dto.type());
         transaction.setDescription(dto.description());
         transaction.setCategories(categories);
         transaction.setInstallments(new ArrayList<>());

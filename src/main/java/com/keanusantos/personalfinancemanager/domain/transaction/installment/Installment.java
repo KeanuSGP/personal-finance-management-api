@@ -1,12 +1,20 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
+import com.keanusantos.personalfinancemanager.domain.payment.Payment;
+import com.keanusantos.personalfinancemanager.domain.payment.dto.request.CreatePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
+import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
+import com.keanusantos.personalfinancemanager.exception.BusinessException;
+import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.HttpStatus;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -112,6 +120,33 @@ public class Installment {
         if (installment.status() != null) {
             this.status = installment.status();
         }
+    }
+
+    public Payment pay(CreatePaymentDTO payment) {
+        if (!status.equals(InstallmentStatus.PENDING)) {
+            throw new BusinessException("Payment status is not PENDING", HttpStatus.CONFLICT);
+        }
+
+
+        if (transaction.getType() == TransactionType.CREDIT) {
+            payment.financialAccount().setBalance(payment.financialAccount().getBalance() + amount);
+        }
+
+        if (transaction.getType() == TransactionType.DEBIT) {
+            if (payment.financialAccount().getBalance() < amount) {
+                throw new BusinessException("Account balance is below than installment amount", HttpStatus.CONFLICT);
+            }
+            payment.financialAccount().setBalance(payment.financialAccount().getBalance() - amount);
+        }
+
+        Payment pay = new Payment();
+        pay.setMoment(Instant.now());
+        pay.setFinancialAccount(payment.financialAccount());
+        pay.setInstallment(this);
+
+        status = InstallmentStatus.PAID;
+
+        return pay;
     }
 
 
