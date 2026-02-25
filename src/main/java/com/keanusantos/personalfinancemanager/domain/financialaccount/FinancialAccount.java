@@ -1,10 +1,12 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
 import com.keanusantos.personalfinancemanager.domain.user.User;
+import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 
@@ -66,6 +68,22 @@ public class FinancialAccount {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public void debit(Float amount) {
+        validateBalance(amount);
+        this.balance -= amount;
+    }
+
+    public void credit(Float amount) {
+        validateBalance(amount);
+        this.balance += amount;
+    }
+
+    public void validateBalance(Float amount) {
+        if (balance < amount) {
+            throw new BusinessException("Insufficient balance", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    };
 
     @Override
     public boolean equals(Object o) {
