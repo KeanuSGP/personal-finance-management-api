@@ -1,15 +1,15 @@
-package com.keanusantos.personalfinancemanager.domain.transaction;
+package com.keanusantos.personalfinancemanager.domain.transaction.installment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.payment.Payment;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.request.CreatePaymentDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
-import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
@@ -122,31 +122,43 @@ public class Installment {
         }
     }
 
-    public Payment pay(CreatePaymentDTO payment) {
+    public Payment pay(FinancialAccount financialAccount) {
         if (!status.equals(InstallmentStatus.PENDING)) {
             throw new BusinessException("Payment status is not PENDING", HttpStatus.CONFLICT);
         }
 
-
         if (transaction.getType() == TransactionType.CREDIT) {
-            payment.financialAccount().setBalance(payment.financialAccount().getBalance() + amount);
+            financialAccount.credit(amount);
         }
 
         if (transaction.getType() == TransactionType.DEBIT) {
-            if (payment.financialAccount().getBalance() < amount) {
-                throw new BusinessException("Account balance is below than installment amount", HttpStatus.CONFLICT);
-            }
-            payment.financialAccount().setBalance(payment.financialAccount().getBalance() - amount);
+            financialAccount.debit(amount);
         }
 
         Payment pay = new Payment();
         pay.setMoment(Instant.now());
-        pay.setFinancialAccount(payment.financialAccount());
+        pay.setFinancialAccount(financialAccount);
         pay.setInstallment(this);
 
         status = InstallmentStatus.PAID;
 
         return pay;
+    }
+
+    public void removePayment(Payment payment) {
+        if (!status.equals(InstallmentStatus.PAID)) {
+            throw new BusinessException("Payment status is not PAID", HttpStatus.CONFLICT);
+        }
+
+        if (transaction.getType() == TransactionType.CREDIT) {
+            payment.getFinancialAccount().debit(amount);
+        }
+
+        if (transaction.getType() == TransactionType.DEBIT) {
+            payment.getFinancialAccount().credit(amount);
+        }
+
+        status = InstallmentStatus.PENDING;
     }
 
 
