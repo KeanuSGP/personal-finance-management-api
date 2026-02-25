@@ -60,7 +60,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
-        String error = "Argument Not Valid";
+        String error = "Json error";
         HttpStatus status = HttpStatus.valueOf(statusCode.value());
         String message = "There is an error in the data sent";
 
