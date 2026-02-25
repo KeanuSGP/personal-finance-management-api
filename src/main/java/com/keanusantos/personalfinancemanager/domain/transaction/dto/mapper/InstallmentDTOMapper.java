@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper;
 
-import com.keanusantos.personalfinancemanager.domain.transaction.Installment;
+import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
