@@ -16,12 +16,12 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.tra
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
+import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -143,7 +143,6 @@ public class TransactionService {
 
         transaction.setDoc(newData.doc());
         transaction.setIssueDate(newData.issueDate());
-        transaction.setType(newData.type());
         transaction.setDescription(newData.description());
         transaction.setCategories(categories);
         transaction.setCounterparty(counterParty);
@@ -168,18 +167,25 @@ public class TransactionService {
     }
 
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
-        Transaction t = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
-        CounterParty counterP = counterPService.findByIdEntity(newData.counterParty());
-        FinancialAccount finAcc = finAccService.findByIdEntity(newData.financialAccount());
-        User user = userService.findByIdEntity(newData.user());
+        Transaction t = findByIdEntity(id);
+
+        if (newData.categories() != null) {
+            Set<Category> categories = newData.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
+            if (!categories.isEmpty()) {
+                t.setCategories(categories);
+            }
+        }
+
+        CounterParty counterP = newData.counterParty() != null ? counterPService.findByIdEntity(newData.counterParty()): t.getCounterparty();
+        FinancialAccount finAcc = newData.financialAccount() != null ? finAccService.findByIdEntity(newData.financialAccount()): t.getFinancialAccount();
+        User user = newData.user() != null ? userService.findByIdEntity(newData.user()):  t.getUser();
 
 
         if (repository.existsByDocAndIdNot(newData.doc(), t.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
 
-        t.partialUpdateTransaction(t, newData, categories, counterP, finAcc, user);
+        t.partialUpdateTransaction(newData, counterP, finAcc, user);
         repository.save(t);
         return TransactionDTOMapper.toResponse(t);
 
