@@ -69,3 +69,12 @@ PRIMARY KEY (transaction_id, category_id),
 FOREIGN KEY (transaction_id) references transactions(id),
 FOREIGN KEY (category_id) references category(id)
 );
+
+CREATE TABLE payment (
+payment_id BIGINT NOT NULL,
+moment TIMESTAMP NOT NULL,
+financial_account_id BIGINT NOT NULL,
+installment_id BIGINT NOT NULL,
+FOREIGN KEY (financial_account_id) references financial_accounts(id),
+FOREIGN KEY (installment_id) references installments(id)
+);
