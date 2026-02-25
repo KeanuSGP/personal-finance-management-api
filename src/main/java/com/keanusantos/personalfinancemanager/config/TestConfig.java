@@ -6,20 +6,23 @@ import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
 import com.keanusantos.personalfinancemanager.domain.counterparty.CounterPartyRepository;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountRepository;
-import com.keanusantos.personalfinancemanager.domain.transaction.Installment;
+import com.keanusantos.personalfinancemanager.domain.payment.Payment;
+import com.keanusantos.personalfinancemanager.domain.payment.PaymentRepository;
+import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
 import com.keanusantos.personalfinancemanager.domain.transaction.TransactionRepository;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
+import com.keanusantos.personalfinancemanager.domain.transaction.installment.InstallmentRepository;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -42,6 +45,12 @@ public class TestConfig implements CommandLineRunner {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private InstallmentRepository installmentRepository;
 
 
     @Override
@@ -89,7 +98,14 @@ public class TestConfig implements CommandLineRunner {
         t1.addInstallment(installment2);
         t1.addInstallment(installment3);
 
+
         transactionRepository.save(t1);
+
+        Payment payment = installment1.pay(finAcc3);
+        installmentRepository.save(installment1);
+        finAccRepository.save(finAcc3);
+        paymentRepository.save(payment);
+
 
     }
 }
