@@ -1,6 +1,5 @@
 package com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction;
 
-import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.create.CreateInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import jakarta.persistence.EnumType;
