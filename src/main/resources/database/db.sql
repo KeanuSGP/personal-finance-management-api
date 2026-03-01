@@ -3,8 +3,7 @@ USE personal_financial_system;
 
 CREATE TABLE users(
 id BIGINT AUTO_INCREMENT NOT NULL,
-username VARCHAR(50) NOT NULL,
-email VARCHAR(50) UNIQUE NOT NULL,
+username VARCHAR(50) NOT NULL UNIQUE,
 user_password VARCHAR(15) NOT NULL,
 PRIMARY KEY(id)
 );
