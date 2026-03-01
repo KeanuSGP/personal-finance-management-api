@@ -8,6 +8,7 @@ import jakarta.validation.constraints.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -16,29 +17,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "O nome deve ser preenchido")
-    @Size(min = 3, max = 10)
     @Column(unique=true, name = "username")
     private String name;
 
-    @NotEmpty(message = "O email deve ser preenchido")
-    @Email(message = "Email inválido!")
-    @Column(unique=true)
-    private String email;
-
-    @NotEmpty(message = "A senha deve ser preenchida")
-    @NotBlank(message = "A senha não pode ficar em branco")
-    @Size(min = 4, max = 6)
     @Column(name = "user_password")
     private String password;
 
     public User() {
     }
 
-    public User(Long id, String name, String email, String password) {
+    public User(Long id, String name, String password) {
         this.id = id;
         this.name = name;
-        this.email = email;
         this.password = password;
     }
 
@@ -58,14 +48,6 @@ public class User {
         this.name = name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -78,11 +60,11 @@ public class User {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(email, user.email);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email);
+        return Objects.hash(id);
     }
 }
