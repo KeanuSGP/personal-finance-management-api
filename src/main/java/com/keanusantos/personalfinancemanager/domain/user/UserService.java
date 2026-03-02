@@ -1,14 +1,22 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
+import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.config.security.UserDetailsServiceImpl;
+import com.keanusantos.personalfinancemanager.domain.role.Role;
+import com.keanusantos.personalfinancemanager.domain.role.RoleRepository;
+import com.keanusantos.personalfinancemanager.domain.role.enums.RoleName;
 import com.keanusantos.personalfinancemanager.domain.user.dto.mapper.UserDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.user.dto.request.CreateUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.request.PutUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.response.UserResponseDTO;
-import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,6 +27,12 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
     public User findByIdEntity(Long id){
         return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
@@ -35,13 +49,24 @@ public class UserService {
     public UserResponseDTO insert(CreateUserDTO obj) {
         User user =  UserDTOMapper.toEntity(obj);
 
-        if (repository.existsByEmail(obj.email())) {
-            throw new ResourceAlreadyExistsException("Email not available");
-        }
-
         if (repository.existsByName(obj.name())) {
             throw new ResourceAlreadyExistsException("Name not available");
         }
+
+        if (repository.findAll().isEmpty()) {
+            List<Role> roles = new ArrayList<>();
+            Role role = roleRepository.findByRole(RoleName.ROLE_ADMIN).orElseThrow(() -> new UsernameNotFoundException(RoleName.ROLE_ADMIN.toString()));
+            roles.add(role);
+            user.setRoles(roles);
+
+        } else {
+            List<Role> roles = new ArrayList<>();
+            Role role = roleRepository.findByRole(RoleName.ROLE_USER).orElseThrow(() -> new UsernameNotFoundException(RoleName.ROLE_USER.toString()));
+            roles.add(role);
+            user.setRoles(roles);
+        }
+
+        user.setPassword(passwordEncoder.encode(obj.password()));
 
         repository.save(user);
         return UserDTOMapper.toResponse(user);
@@ -49,10 +74,6 @@ public class UserService {
 
     public UserResponseDTO update(Long id, PutUserDTO obj) {
         User entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-
-        if (repository.existsByEmailAndIdNot(obj.email(), entity.getId())) {
-            throw new ResourceAlreadyExistsException("Email not available");
-        }
 
         if (repository.existsByNameAndIdNot(obj.name(), entity.getId())) {
             throw new ResourceAlreadyExistsException("Name not available");
@@ -65,8 +86,7 @@ public class UserService {
 
     private void updateUserData(User entity, PutUserDTO obj) {
         entity.setName(obj.name());
-        entity.setEmail(obj.email());
-        entity.setPassword(obj.password());
+        entity.setPassword(passwordEncoder.encode(obj.password()));
     }
 
     public void delete(Long id) {
