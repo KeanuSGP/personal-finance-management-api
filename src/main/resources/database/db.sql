@@ -1,11 +1,25 @@
 CREATE DATABASE personal_financial_system;
 USE personal_financial_system;
 
-CREATE TABLE users(
+CREATE TABLE users (
 id BIGINT AUTO_INCREMENT NOT NULL,
 username VARCHAR(50) NOT NULL UNIQUE,
-user_password VARCHAR(15) NOT NULL,
+user_password VARCHAR(255) NOT NULL,
 PRIMARY KEY(id)
+);
+
+CREATE TABLE roles (
+id BIGINT AUTO_INCREMENT NOT NULL,
+role_name VARCHAR(100) NOT NULL UNIQUE,
+PRIMARY KEY (id)
+);
+
+CREATE TABLE users_roles (
+user_id BIGINT NOT NULL,
+role_id BIGINT NOT NULL,
+PRIMARY KEY (user_id, role_id),
+FOREIGN KEY (user_id) REFERENCES users(id),
+FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 CREATE TABLE financial_accounts (
@@ -77,3 +91,6 @@ installment_id BIGINT NOT NULL,
 FOREIGN KEY (financial_account_id) references financial_accounts(id),
 FOREIGN KEY (installment_id) references installments(id)
 );
+
+INSERT INTO roles VALUES(1, "ROLE_ADMIN");
+INSERT INTO roles VALUES(2, "ROLE_USER");
