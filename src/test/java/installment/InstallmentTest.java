@@ -6,6 +6,7 @@ import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
+import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ public class InstallmentTest {
     @Test
     void shouldUpdateBalanceWhenPaymentTypeIsDebit() {
         t = new Transaction(null, "NF222222", LocalDate.now(), TransactionType.DEBIT,  tDescription, new HashSet<>(), new ArrayList<>(), null, null, null);
-        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PENDING, t);
+        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PENDING, t, null);
 
         installment.pay(finAcc);
 
@@ -44,7 +45,7 @@ public class InstallmentTest {
     @Test
     void shouldUpdateBalanceWhenPaymentTypeIsCredit() {
         t = new Transaction(null, "NF222222", LocalDate.now(), TransactionType.CREDIT,  tDescription, new HashSet<>(), new ArrayList<>(), null, null, null);
-        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PENDING, t);
+        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PENDING, t, null);
 
         installment.pay(finAcc);
 
@@ -55,9 +56,10 @@ public class InstallmentTest {
     @Test
     void shouldIncreaseBalanceWhenPaymentTypeIsDebit() {
         t = new Transaction(null, "NF222222", LocalDate.now(), TransactionType.DEBIT,  tDescription, new HashSet<>(), new ArrayList<>(), null, null, null);
-        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PAID, t);
+        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PAID, t, null);
 
-        Payment payment = new Payment(null, Instant.now(), finAcc, installment);
+        User user = new User();
+        Payment payment = new Payment(null, Instant.now(), finAcc, installment, user);
 
         installment.removePayment(payment);
 
@@ -68,9 +70,9 @@ public class InstallmentTest {
     @Test
     void shouldDecreaseBalanceWhenPaymentTypeIsCredit() {
         t = new Transaction(null, "NF222222", LocalDate.now(), TransactionType.CREDIT,  tDescription, new HashSet<>(), new ArrayList<>(), null, null, null);
-        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PAID, t);
+        Installment installment = new Installment(null, 1, 300f, LocalDate.now(), InstallmentStatus.PAID, t, null);
 
-        Payment payment = new Payment(null, Instant.now(), finAcc, installment);
+        Payment payment = new Payment(null, Instant.now(), finAcc, installment, new User());
 
         installment.removePayment(payment);
 
@@ -81,9 +83,10 @@ public class InstallmentTest {
     @Test
     void shouldThrowsBusinessException() {
         t = new Transaction(null, "NF222222", LocalDate.now(), TransactionType.CREDIT,  tDescription, new HashSet<>(), new ArrayList<>(), null, null, null);
-        Installment installment = new Installment(null, 1, 2300f, LocalDate.now(), InstallmentStatus.PAID, t);
+        Installment installment = new Installment(null, 1, 2300f, LocalDate.now(), InstallmentStatus.PAID, t, null);
 
-        Payment payment = new Payment(null, Instant.now(), finAcc, installment);
+
+        Payment payment = new Payment(null, Instant.now(), finAcc, installment, new User());
 
         assertThrows(BusinessException.class, () -> installment.pay(finAcc));
     }
