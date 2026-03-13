@@ -1,8 +1,10 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
+import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.request.CreateUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.request.PutUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.response.UserResponseDTO;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,27 +26,25 @@ public class UserController {
         return service.findAll();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @GetMapping(value = "/{id}")
-    public UserResponseDTO findById(@PathVariable Long id) {
-        return service.findById(id);
+    @GetMapping(value = "/me")
+    public UserResponseDTO getCurrentUser() {
+        return service.getCurrentUser();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDTO insert(@Valid @RequestBody CreateUserDTO obj) {
         return service.insert(obj);
     }
 
-    @PutMapping(value = "/{id}")
-    public UserResponseDTO update(@PathVariable Long id, @RequestBody @Valid PutUserDTO obj) {
-        return service.update(id, obj);
+    @PutMapping(value = "/me")
+    public UserResponseDTO updateCurrentUser(@RequestBody @Valid PutUserDTO obj) {
+        return service.updateByAuthenticatedUser(obj);
     }
 
-    @DeleteMapping(value="/{id}")
+    @DeleteMapping(value="/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    public void delete() {
+        service.delete();
     }
 }

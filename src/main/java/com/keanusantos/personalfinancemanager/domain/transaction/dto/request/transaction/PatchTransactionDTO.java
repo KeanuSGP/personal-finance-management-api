@@ -14,8 +14,7 @@ public record PatchTransactionDTO(
         @Enumerated(EnumType.STRING) TransactionType type,
         @Size(min = 3, message = "Description must have at least 3 characters long") String description,
         Set<Long> categories,
-        Long counterParty,
-        Long financialAccount,
-        Long user
+        Long counterparty,
+        Long financialAccount
 ){
 }

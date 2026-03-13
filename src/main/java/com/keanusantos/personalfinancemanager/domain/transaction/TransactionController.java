@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
+import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.CreateTransactionDTO;
@@ -9,6 +10,7 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.Tr
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +22,15 @@ public class TransactionController {
     @Autowired
     private TransactionService service;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<TransactionResponseDTO> findAll() {
         return service.findAll();
+    }
+
+    @GetMapping(value="/me")
+    public List<TransactionResponseDTO> findAllByAuthenticatedUser() {
+        return service.findAllByAuthenticatedUser();
     }
 
     @GetMapping(value = "/{id}")
@@ -30,9 +38,9 @@ public class TransactionController {
         return service.findById(id);
     }
 
-    @GetMapping(value = "/account/{id}")
-    public List<TransactionResponseDTO> findByFinancialAccountId(@PathVariable Long id) {
-        return service.findByFinancialAccountId(id);
+    @GetMapping(value = "/account/{name}")
+    public List<TransactionResponseDTO> findByFinancialAccountName(@PathVariable String name) {
+        return service.findByFinancialAccountName(name);
     }
 
     @PostMapping

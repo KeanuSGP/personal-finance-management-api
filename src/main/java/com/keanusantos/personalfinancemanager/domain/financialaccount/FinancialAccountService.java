@@ -1,16 +1,19 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
+import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.mapper.FinancialAccountDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.CreateAccountDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.PutAccountDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
+import com.keanusantos.personalfinancemanager.domain.role.enums.RoleName;
+import com.keanusantos.personalfinancemanager.domain.transaction.TransactionRepository;
 import com.keanusantos.personalfinancemanager.domain.user.User;
-import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,25 +26,51 @@ public class FinancialAccountService {
     private FinancialAccountRepository repository;
 
     @Autowired
-    private UserService userService;
+    private TransactionRepository transactionRepository;
+
 
     public FinancialAccount findByIdEntity(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
     public List<FinancialAccountResponseDTO> findAll() {
-        return repository.findAll().stream().map(FinancialAccountDTOMapper::toFinancialAccountResponseDTO).collect(Collectors.toList());
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (user == null) {
+            throw new BusinessException("Not authenticated user found",  HttpStatus.UNAUTHORIZED);
+        }
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
+        if (!isAdmin) {throw new BusinessException("Access denied",  HttpStatus.FORBIDDEN);}
+
+        return repository.findAll().stream().map(FinancialAccountDTOMapper::toFinancialAccountResponseDTO).toList();
+    }
+
+    public List<FinancialAccountResponseDTO> findAllByUserId() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
+        }
+
+        return repository.findAllByUserId(user.getId()).stream().map(FinancialAccountDTOMapper::toFinancialAccountResponseDTO).collect(Collectors.toList());
     }
 
     public FinancialAccountResponseDTO findById(Long id) {
-        return FinancialAccountDTOMapper.toFinancialAccountResponseDTO(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id)));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        FinancialAccount finAcc = findByIdAndUserId(id, user.getId());
+
+        return FinancialAccountDTOMapper.toFinancialAccountResponseDTO(finAcc);
     }
 
     public FinancialAccountResponseDTO insert(CreateAccountDTO account) {
-        if (repository.existsByName(account.name())) {
-            throw new ResourceAlreadyExistsException("Name not available: " + account.name());
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (repository.existsByNameAndUserId(account.name(), user.getId())) {
+            throw new ResourceAlreadyExistsException("This account already exists: " + account.name());
         }
-        User user = userService.findByIdEntity(account.user());
         FinancialAccount financialAccount = FinancialAccountDTOMapper.toEntity(account, user);
         repository.save(financialAccount);
         return FinancialAccountDTOMapper.toFinancialAccountResponseDTO(financialAccount);
@@ -49,7 +78,13 @@ public class FinancialAccountService {
     }
 
     public FinancialAccountResponseDTO update(Long id, PutAccountDTO newAccountData) {
-        FinancialAccount acc = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
+        }
+
+        FinancialAccount acc = findByIdAndUserId(id, user.getId());
         updateAccount(acc, newAccountData);
         repository.save(acc);
         return  FinancialAccountDTOMapper.toFinancialAccountResponseDTO(acc);
@@ -57,21 +92,37 @@ public class FinancialAccountService {
     }
 
     public void updateAccount(FinancialAccount acc, PutAccountDTO newData) {
-        User user = userService.findByIdEntity(newData.user());
-
-        if (repository.existsByNameAndIdNot(newData.name(), acc.getId())) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (repository.existsByNameAndUserIdAndIdNot(newData.name(), user.getId(),  acc.getId())) {
             throw new ResourceAlreadyExistsException("Name not available: " + newData.name());
         }
 
         acc.setName(newData.name());
         acc.setBalance(newData.balance());
-        acc.setUser(user);
     }
 
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException(id);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
+
+        findByIdAndUserId(id, user.getId());
+
+        if (transactionRepository.existsByFinancialAccountIdAndUser_Id(id, user.getId())) {
+            throw new BusinessException("This financial account has associated transactions", HttpStatus.BAD_REQUEST);
+        }
+
         repository.deleteById(id);
+    }
+
+    public FinancialAccount findByIdAndUserId(Long id, Long userId) {
+        return repository.findByIdAndUserId(id, userId).orElseThrow(ResourceNotFoundException::new);
+    }
+
+    public FinancialAccount findByNameAndUserId(String name, Long userId) {
+        return repository.findByNameAndUserId(name, userId).orElseThrow(ResourceNotFoundException::new);
     }
 }

@@ -5,6 +5,7 @@ import com.keanusantos.personalfinancemanager.domain.category.dto.request.PutCat
 import com.keanusantos.personalfinancemanager.domain.category.dto.response.CategoryResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,9 +17,15 @@ public class CategoryController {
     @Autowired
     CategoryService service;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<CategoryResponseDTO> findAll() {
         return service.findAll();
+    }
+
+    @GetMapping(value = "/me")
+    public List<CategoryResponseDTO> findAllByUser() {
+        return service.findAllByAuthenticatedUser();
     }
 
     @GetMapping(value = "/{id}")

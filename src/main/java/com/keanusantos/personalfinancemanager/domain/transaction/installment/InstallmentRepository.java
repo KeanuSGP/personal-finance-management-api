@@ -2,6 +2,8 @@ package com.keanusantos.personalfinancemanager.domain.transaction.installment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface InstallmentRepository extends JpaRepository<Installment, Long>
-{
+import java.util.Optional;
+
+public interface InstallmentRepository extends JpaRepository<Installment, Long> {
+    Optional<Installment> findByIdAndTransactionUserId(Long id, Long userId);
 }

@@ -1,25 +1,33 @@
 package com.keanusantos.personalfinancemanager.domain.counterparty;
 
+import com.keanusantos.personalfinancemanager.domain.category.dto.response.CategoryResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.CreateCounterPartyDTO;
-import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.PutCounterPartyDTO;
+import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.PutCounterpartyDTO;
 import com.keanusantos.personalfinancemanager.domain.counterparty.dto.response.CounterPartyResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/counterparties")
-public class CounterPartyController {
+public class CounterpartyController {
 
     @Autowired
-    private CounterPartyService service;
+    private CounterpartyService service;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<CounterPartyResponseDTO> findAll() {
         return service.findAll();
+    }
+
+    @GetMapping(value = "/me")
+    public List<CounterPartyResponseDTO> findAllByUser() {
+        return service.findAllByUserId();
     }
 
     @GetMapping(value = "/{id}")
@@ -34,7 +42,7 @@ public class CounterPartyController {
     }
 
     @PutMapping(value = "/{id}")
-    public CounterPartyResponseDTO update(@PathVariable Long id, @RequestBody @Valid PutCounterPartyDTO obj) {
+    public CounterPartyResponseDTO update(@PathVariable Long id, @RequestBody @Valid PutCounterpartyDTO obj) {
         return service.update(id, obj);
     }
 

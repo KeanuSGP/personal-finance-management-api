@@ -28,8 +28,7 @@ public record PutTransactionDTO (
         @Size(min = 3, message = "Description must have at least 3 characters long")
         String description,
         @NotEmpty(message = "The categories must not be empty") Set<Long> categories,
-        @NotNull(message = "The counterparty must not be null") Long counterParty,
-        @NotNull(message = "The financial account must not be empty") Long financialAccount,
-        @NotNull(message = "The user must not be empty") Long user
-){
-}
+        @NotNull(message = "The counterparty must not be null") Long counterparty,
+        @NotNull(message = "The financial account must not be empty") Long financialAccount
+)
+{}

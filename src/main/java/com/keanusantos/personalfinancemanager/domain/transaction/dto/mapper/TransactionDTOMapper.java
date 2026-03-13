@@ -2,7 +2,7 @@ package com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper;
 
 import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.category.dto.mapper.CategoryDTOMapper;
-import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
+import com.keanusantos.personalfinancemanager.domain.counterparty.Counterparty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.CreateTransactionDTO;
@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TransactionDTOMapper {
-    public static Transaction toTransaction(CreateTransactionDTO dto, Set<Category> categories, CounterParty counterParty, FinancialAccount financialAccount, User user){
+    public static Transaction toTransaction(CreateTransactionDTO dto, Set<Category> categories, Counterparty counterParty, FinancialAccount financialAccount, User user){
         Transaction transaction =  new Transaction();
         transaction.setDoc(dto.doc());
         transaction.setIssueDate(dto.issueDate());

@@ -1,11 +1,13 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
+import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
 import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.category.CategoryService;
-import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
-import com.keanusantos.personalfinancemanager.domain.counterparty.CounterPartyService;
+import com.keanusantos.personalfinancemanager.domain.counterparty.Counterparty;
+import com.keanusantos.personalfinancemanager.domain.counterparty.CounterpartyService;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountService;
+import com.keanusantos.personalfinancemanager.domain.role.enums.RoleName;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper.InstallmentDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper.TransactionDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
@@ -18,12 +20,13 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.Tr
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.user.User;
-import com.keanusantos.personalfinancemanager.domain.user.UserService;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,56 +38,89 @@ public class TransactionService {
     @Autowired
     private TransactionRepository repository;
     @Autowired
-    private CounterPartyService counterPService;
+    private CounterpartyService counterPService;
     @Autowired
     private FinancialAccountService finAccService;
     @Autowired
     private CategoryService categoryService;
-    @Autowired
-    private UserService userService;
 
 
     public Transaction findByIdEntity(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
-    public List<TransactionResponseDTO> findAll(){
-        List<Transaction> transactions = repository.findAll();
-        List<TransactionResponseDTO> responseList = transactions.stream().map(TransactionDTOMapper::toResponse).toList();
-        return responseList;
+    public List<TransactionResponseDTO> findAll() {
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User entity = user.getUser();
+        if (entity == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
+        }
+        boolean isAdmin = entity.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
+        if (!isAdmin) {
+            throw new BusinessException("Access denied", HttpStatus.FORBIDDEN);
+        }
+        return repository.findAll().stream().map(TransactionDTOMapper::toResponse).toList();
+    }
+
+    public List<TransactionResponseDTO> findAllByAuthenticatedUser(){
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
+
+        List<Transaction> transactions = repository.findAllByUser_Id(user.getId());
+        return transactions.stream().map(TransactionDTOMapper::toResponse).toList();
     }
 
     public TransactionResponseDTO findById(Long id) {
-        Transaction transaction = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
+        }
+        Transaction transaction = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
+
         return TransactionDTOMapper.toResponse(transaction);
     }
 
-    public List<TransactionResponseDTO> findByFinancialAccountId(Long id) {
-        finAccService.findById(id); // para lançar exceção caso não exista a conta
+    public List<TransactionResponseDTO> findByFinancialAccountName(String name) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
 
-        List<Transaction> toConvert = repository.findByFinancialAccountId(id);
-
-        List<TransactionResponseDTO> response = new ArrayList<>();
-
-        for (Transaction t : toConvert) {
-            TransactionResponseDTO r = TransactionDTOMapper.toResponse(t);
-            response.add(r);
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
 
-        return response;
+        FinancialAccount fin = finAccService.findByNameAndUserId(name, user.getId());
+
+        List<Transaction> transactions = repository.findAllByFinancialAccountIdAndUserId(fin.getId(), user.getId());
+
+        if(transactions.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        return transactions.stream().map(TransactionDTOMapper::toResponse).toList();
     }
 
     public TransactionResponseDTO insert(CreateTransactionDTO obj) {
-        CounterParty counterParty = counterPService.findByIdEntity(obj.counterParty());
-        FinancialAccount financialAccount = finAccService.findByIdEntity(obj.financialAccount());
-        Set<Category> categories = obj.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
-        User user =  userService.findByIdEntity(obj.user());
 
-        if (repository.existsByDoc(obj.doc())) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
+        }
+
+        Counterparty counterparty = counterPService.findByIdAndUserId(obj.counterparty(), user.getId());
+        FinancialAccount financialAccount = finAccService.findByIdAndUserId(obj.financialAccount(), user.getId());
+        Set<Category> categories = categoryService.findCategoriesByOwner(obj.categories(), user.getId());
+
+
+        if (repository.existsByDocAndUser_Id(obj.doc(), user.getId())) {
             throw new ResourceAlreadyExistsException("Document already exists: " +  obj.doc());
         };
 
-        Transaction transaction = TransactionDTOMapper.toTransaction(obj, categories, counterParty, financialAccount, user);
+        Transaction transaction = TransactionDTOMapper.toTransaction(obj, categories, counterparty, financialAccount, user);
 
         transaction.addListOfInstallments(createInstallments(obj.installments(), transaction));
 
@@ -124,40 +160,51 @@ public class TransactionService {
     }
 
     public TransactionResponseDTO update(Long id, PutTransactionDTO newData) {
-        Transaction transaction = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
-        putUpdateTransaction(transaction, newData);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
+        }
+        Transaction transaction = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
+        putUpdateTransaction(transaction, user, newData);
         repository.save(transaction);
 
         return TransactionDTOMapper.toResponse(transaction);
     }
 
-    private void putUpdateTransaction(Transaction transaction, PutTransactionDTO newData) {
-        if (repository.existsByDocAndIdNot(newData.doc(), transaction.getId())) {
+    private void putUpdateTransaction(Transaction transaction, User user, PutTransactionDTO newData) {
+        if (repository.existsByDocAndUser_IdAndIdNot(newData.doc(), user.getId(), transaction.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
 
-        CounterParty counterParty = counterPService.findByIdEntity(newData.counterParty());
-        FinancialAccount financialAccount = finAccService.findByIdEntity(newData.financialAccount());
-        Set<Category> categories = newData.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
-        User user =  userService.findByIdEntity(newData.user());
+        Counterparty counterparty = counterPService.findByIdAndUserId(newData.counterparty(), user.getId());
+        FinancialAccount financialAccount = finAccService.findByIdAndUserId(newData.financialAccount(), user.getId());
+        Set<Category> categories = categoryService.findCategoriesByOwner(newData.categories(), user.getId());
 
         transaction.setDoc(newData.doc());
         transaction.setIssueDate(newData.issueDate());
         transaction.setDescription(newData.description());
         transaction.setCategories(categories);
-        transaction.setCounterparty(counterParty);
+        transaction.setCounterparty(counterparty);
         transaction.setFinancialAccount(financialAccount);
-        transaction.setUser(user);
-
     }
 
     public PutInstallmentDTO putUpdateInstallment(Long transactionId, Long id, PutInstallmentDTO installmentDTO) {
-        Transaction t = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
-        Installment i = t.getInstallments().stream().filter(c -> c.getId().equals(id)).findFirst().orElseThrow(() -> new ResourceNotFoundException(id));
 
-        boolean exists = t.getInstallments().stream().anyMatch(c -> !c.getId().equals(id) && c.getInstallmentNumber().equals(installmentDTO.installmentNumber()));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
 
-        if (exists) {
+        Transaction t = repository.findByIdAndUser_Id(transactionId, user.getId()).orElseThrow(ResourceNotFoundException::new);
+
+        Installment i = t.getInstallments().stream().filter(c -> c.getId().equals(id)).findFirst().orElseThrow(ResourceNotFoundException::new);
+
+        if (i.getStatus() == InstallmentStatus.PAID) {
+            throw new BusinessException("You cannot change a paid installment", HttpStatus.BAD_REQUEST);
+        }
+
+        boolean existsByInstallmentNumber = t.getInstallments().stream().anyMatch(c -> !c.getId().equals(id) && c.getInstallmentNumber().equals(installmentDTO.installmentNumber()));
+
+        if (existsByInstallmentNumber) {
             throw new BusinessException("This installment number already exists: " + installmentDTO.installmentNumber(), HttpStatus.BAD_REQUEST);
         }
 
@@ -167,21 +214,24 @@ public class TransactionService {
     }
 
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
-        Transaction t = findByIdEntity(id);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        Transaction t = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
 
         if (newData.categories() != null) {
-            Set<Category> categories = newData.categories().stream().map(n -> categoryService.findByIdEntity(n)).collect(Collectors.toSet());
+            Set<Category> categories = newData.categories().stream().map(cId -> categoryService.findByIdEntity(cId)).collect(Collectors.toSet());
             if (!categories.isEmpty()) {
                 t.setCategories(categories);
             }
         }
 
-        CounterParty counterP = newData.counterParty() != null ? counterPService.findByIdEntity(newData.counterParty()): t.getCounterparty();
-        FinancialAccount finAcc = newData.financialAccount() != null ? finAccService.findByIdEntity(newData.financialAccount()): t.getFinancialAccount();
-        User user = newData.user() != null ? userService.findByIdEntity(newData.user()):  t.getUser();
+        Counterparty counterP = newData.counterparty() != null ? counterPService.findByIdAndUserId(newData.counterparty(), user.getId()): t.getCounterparty();
+        FinancialAccount finAcc = newData.financialAccount() != null ? finAccService.findByIdAndUserId(newData.financialAccount(), user.getId()): t.getFinancialAccount();
 
 
-        if (repository.existsByDocAndIdNot(newData.doc(), t.getId())) {
+        if (repository.existsByDocAndUser_IdAndIdNot(newData.doc(), user.getId(), t.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
         }
 
@@ -192,30 +242,63 @@ public class TransactionService {
     }
 
     public PatchInstallmentDTO partialUpdateInstallment(Long transactionId, Long installmentId, PatchInstallmentDTO newData) {
-        Transaction transaction = repository.findById(transactionId).orElseThrow(() -> new ResourceNotFoundException(transactionId));
-        Installment installment = transaction.getInstallments().stream().filter(a -> a.getId().equals(installmentId)).findFirst().orElseThrow(() -> new ResourceNotFoundException(installmentId));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
 
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
+        }
+
+        Transaction transaction = repository.findByIdAndUser_Id(transactionId, user.getId()).orElseThrow(ResourceNotFoundException::new);
+        Installment installment = transaction.getInstallments().stream().filter(a -> a.getId().equals(installmentId)).findFirst().orElseThrow(ResourceNotFoundException::new);
+        if (installment.getStatus() == InstallmentStatus.PAID) {
+            throw new BusinessException("You cannot change a paid installment", HttpStatus.BAD_REQUEST);
+        }
         boolean exists = transaction.getInstallments().stream().anyMatch(a -> !a.getId().equals(installmentId) && a.getInstallmentNumber().equals(newData.installmentNumber()));
-
         if (exists) {
             throw new BusinessException("This installment number already exists: " + newData.installmentNumber(), HttpStatus.BAD_REQUEST);
         }
-
+        if (!transaction.getUser().getId().equals(user.getId())) {
+            throw new BusinessException("Transaction not found or access denied", HttpStatus.FORBIDDEN);
+        }
         installment.partialUpdateData(newData);
         repository.save(transaction);
         return InstallmentDTOMapper.installmentToPatchDTO(installment);
     }
 
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException(id);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        if (!repository.existsByIdAndUser_Id(id, user.getId())) {
+            throw new ResourceNotFoundException();
         }
-        repository.deleteById(id);
+
+        Transaction t = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
+
+        if (repository.existsPaidInstallmentById(id)) {
+            t.getInstallments().removeIf(i -> i.getStatus() != InstallmentStatus.PAID);
+            repository.save(t);
+        } else {
+            repository.deleteById(id);
+        }
+
     }
 
     public void deleteInstallment(Long tId, Long iId) {
-        Transaction t = repository.findById(tId).orElseThrow(() -> new ResourceNotFoundException(tId));
-        Installment i = t.getInstallments().stream().filter(a -> a.getId().equals(iId)).findFirst().orElseThrow(() -> new ResourceNotFoundException(iId));
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        Transaction t = repository.findById(tId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!t.getUser().getId().equals(user.getId())) {
+            throw new BusinessException("Transaction not found or access denied", HttpStatus.FORBIDDEN);
+        }
+
+        Installment i = t.getInstallments().stream().filter(a -> a.getId().equals(iId)).findFirst().orElseThrow(ResourceNotFoundException::new);
+        if (i.getStatus().equals(InstallmentStatus.PAID)) {
+            throw new BusinessException("You cannot delete a paid installment", HttpStatus.BAD_REQUEST);
+        }
         t.getInstallments().remove(i);
         repository.save(t);
     }

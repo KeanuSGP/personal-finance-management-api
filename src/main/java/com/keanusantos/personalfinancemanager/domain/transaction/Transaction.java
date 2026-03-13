@@ -1,7 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
 import com.keanusantos.personalfinancemanager.domain.category.Category;
-import com.keanusantos.personalfinancemanager.domain.counterparty.CounterParty;
+import com.keanusantos.personalfinancemanager.domain.counterparty.Counterparty;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.transaction.PatchTransactionDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
@@ -35,7 +35,7 @@ public class Transaction {
     @Column(name = "transaction_description")
     private String description;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.DETACH)
     @JoinTable(name = "transaction_category",
             joinColumns = @JoinColumn(name = "transaction_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
@@ -44,19 +44,19 @@ public class Transaction {
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Installment> installments;
 
-    @ManyToOne
-    private CounterParty counterparty;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Counterparty counterparty;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.DETACH)
     private FinancialAccount financialAccount;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "user_id")
     private User user;
 
     public Transaction(){};
 
-    public Transaction(Long id, String doc, LocalDate issueDate, TransactionType type, String description, Set<Category> categories, List<Installment> installments, CounterParty counterparty, FinancialAccount financialAccount, User user) {
+    public Transaction(Long id, String doc, LocalDate issueDate, TransactionType type, String description, Set<Category> categories, List<Installment> installments, Counterparty counterparty, FinancialAccount financialAccount, User user) {
         this.id = id;
         this.doc = doc;
         this.issueDate = issueDate;
@@ -121,11 +121,11 @@ public class Transaction {
         this.installments = installments;
     }
 
-    public CounterParty getCounterparty() {
+    public Counterparty getCounterparty() {
         return counterparty;
     }
 
-    public void setCounterparty(CounterParty counterparty) {
+    public void setCounterparty(Counterparty counterparty) {
         this.counterparty = counterparty;
     }
 
@@ -157,7 +157,7 @@ public class Transaction {
         });
     }
 
-    public void partialUpdateTransaction(PatchTransactionDTO newData, CounterParty counterParty,  FinancialAccount financialAccount, User user) {
+    public void partialUpdateTransaction(PatchTransactionDTO newData, Counterparty counterParty, FinancialAccount financialAccount, User user) {
 
         if (newData.doc() != null) {
             this.doc = newData.doc();
@@ -175,7 +175,7 @@ public class Transaction {
             this.description = newData.description();
         }
 
-        if (newData.counterParty() != null) {
+        if (newData.counterparty() != null) {
             this.counterparty = counterParty;
         }
 
@@ -183,7 +183,7 @@ public class Transaction {
             this.financialAccount = financialAccount;
         }
 
-        if (newData.user() != null) {
+        if (user != null) {
             this.user = user;
         }
     }

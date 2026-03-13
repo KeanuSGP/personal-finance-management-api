@@ -15,7 +15,8 @@ public class InstallmentDTOMapper {
                 installmentDTO.amount(),
                 installmentDTO.dueDate(),
                 installmentDTO.status(),
-                transaction
+                transaction,
+                null
         );
     }
 
@@ -26,7 +27,8 @@ public class InstallmentDTOMapper {
                 installmentDTO.amount(),
                 installmentDTO.dueDate(),
                 installmentDTO.status(),
-                transaction
+                transaction,
+                null
         );
     }
 

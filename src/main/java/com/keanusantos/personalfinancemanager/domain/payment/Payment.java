@@ -2,6 +2,7 @@ package com.keanusantos.personalfinancemanager.domain.payment;
 
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
+import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import jakarta.persistence.*;
 import org.springframework.http.HttpStatus;
@@ -17,27 +18,32 @@ public class Payment {
     @Column(name = "payment_id")
     private Long id;
 
-    @Column(columnDefinition = "TIMESTAMP")
+//    @Column(columnDefinition = "TIMESTAMP")
     private Instant moment;
 
     @ManyToOne
     private FinancialAccount financialAccount;
 
-    @ManyToOne
+    @OneToOne
     private Installment installment;
+
+    @ManyToOne
+    private User user;
 
     public Payment() {
     }
 
-    public Payment(Long id, Instant moment, FinancialAccount financialAccount, Installment installment) {
+    public Payment(Long id, Instant moment, FinancialAccount financialAccount, Installment installment, User user) {
         if (moment == null) throw new BusinessException("The payment moment must not be null", HttpStatus.BAD_REQUEST);
         if (financialAccount == null) throw new BusinessException("The financial account must not be null", HttpStatus.BAD_REQUEST);
         if (installment == null) throw new BusinessException("The installment must not be null", HttpStatus.BAD_REQUEST);
+        if(user == null) throw new BusinessException("The user must not be null", HttpStatus.BAD_REQUEST);
 
         this.id = id;
         this.moment = moment.truncatedTo(ChronoUnit.SECONDS);
         this.financialAccount = financialAccount;
         this.installment = installment;
+        this.user = user;
     }
 
     public Long getId() {
@@ -68,6 +74,14 @@ public class Payment {
 
     public void setInstallment(Installment installment) {
         this.installment = installment;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

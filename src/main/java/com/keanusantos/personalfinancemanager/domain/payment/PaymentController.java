@@ -1,10 +1,12 @@
 package com.keanusantos.personalfinancemanager.domain.payment;
 
+import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.request.CreatePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.response.ResponsePaymentDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,10 +18,15 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<ResponsePaymentDTO> findAll() {
         return  paymentService.findAll();
+    }
+
+    @GetMapping(value="/me")
+    public List<ResponsePaymentDTO> findAllByUser() {
+        return paymentService.findAllByUser();
     }
 
     @GetMapping(value = "/{id}")
@@ -27,7 +34,7 @@ public class PaymentController {
         return paymentService.findById(id);
     }
 
-    @PostMapping(value = "/installments/{installmentId}")
+    @PostMapping(value = "/installment/{installmentId}")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponsePaymentDTO insert(@PathVariable Long installmentId, @RequestBody @Valid CreatePaymentDTO dto) {
         return paymentService.insert(installmentId, dto);

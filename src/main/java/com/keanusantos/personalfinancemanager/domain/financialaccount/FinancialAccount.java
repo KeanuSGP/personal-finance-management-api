@@ -75,13 +75,12 @@ public class FinancialAccount {
     }
 
     public void credit(Float amount) {
-        validateBalance(amount);
         this.balance += amount;
     }
 
     public void validateBalance(Float amount) {
         if (balance < amount) {
-            throw new BusinessException("Insufficient balance", HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new BusinessException("Insufficient balance", HttpStatus.BAD_REQUEST);
         }
     };
 

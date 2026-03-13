@@ -2,16 +2,12 @@ package com.keanusantos.personalfinancemanager.domain.counterparty;
 
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "counterparty")
-public class CounterParty {
+public class Counterparty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,10 +21,10 @@ public class CounterParty {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public CounterParty() {
+    public Counterparty() {
     }
 
-    public CounterParty(Long id, String name, String taxId, User user) {
+    public Counterparty(Long id, String name, String taxId, User user) {
         this.id = id;
         this.name = name;
         this.taxId = taxId;
@@ -70,7 +66,7 @@ public class CounterParty {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        CounterParty that = (CounterParty) o;
+        Counterparty that = (Counterparty) o;
         return Objects.equals(id, that.id);
     }
 

@@ -1,12 +1,13 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
+import com.keanusantos.personalfinancemanager.domain.counterparty.dto.response.CounterPartyResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.CreateAccountDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.PutAccountDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
-import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +19,15 @@ public class FinancialAccountController {
     @Autowired
     private FinancialAccountService service;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<FinancialAccountResponseDTO> findAll() {
         return service.findAll();
+    }
+
+    @GetMapping(value = "/me")
+    public List<FinancialAccountResponseDTO> findAllByUser() {
+        return service.findAllByUserId();
     }
 
     @GetMapping(value = "/{id}")
@@ -28,7 +35,7 @@ public class FinancialAccountController {
         return service.findById(id);
     }
 
-    @PostMapping
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public FinancialAccountResponseDTO insert(@Valid @RequestBody CreateAccountDTO obj) {
         return service.insert(obj);

@@ -33,10 +33,8 @@ public record CreateTransactionDTO(
 
         @Valid List<CreateInstallmentDTO> installments,
 
-        @NotNull(message = "The counterparty must not be null") Long counterParty,
+        @NotNull(message = "The counterparty must not be null") Long counterparty,
 
-        @NotNull(message = "The financial account must not be null") Long financialAccount,
-
-        @NotNull(message = "The user must not be null") Long user
+        @NotNull(message = "The financial account must not be null") Long financialAccount
 ) {
 }

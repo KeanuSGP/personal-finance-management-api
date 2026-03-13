@@ -9,6 +9,7 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.ins
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
+import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -41,15 +42,20 @@ public class Installment {
     @JsonIgnore
     private Transaction transaction;
 
+    @OneToOne
+    @JsonIgnore
+    private Payment payment;
+
     public Installment(){};
 
-    public Installment(Long id, Integer installmentNumber, Float amount, LocalDate dueDate, InstallmentStatus status, Transaction transaction) {
+    public Installment(Long id, Integer installmentNumber, Float amount, LocalDate dueDate, InstallmentStatus status, Transaction transaction, Payment payment) {
         this.id = id;
         this.installmentNumber = installmentNumber;
         this.amount = amount;
         this.dueDate = dueDate;
         this.status = status;
         this.transaction = transaction;
+        this.payment = payment;
     }
 
     public Long getId() {
@@ -100,6 +106,13 @@ public class Installment {
         this.transaction = transaction;
     }
 
+    public  Payment getPayment() {
+        return payment;
+    }
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
+
     public void putUpdateData(PutInstallmentDTO installment) {
             this.amount = installment.amount();
             this.installmentNumber = installment.installmentNumber();
@@ -122,7 +135,7 @@ public class Installment {
         }
     }
 
-    public Payment pay(FinancialAccount financialAccount) {
+    public Payment pay(FinancialAccount financialAccount, User user) {
         if (!status.equals(InstallmentStatus.PENDING)) {
             throw new BusinessException("Payment status is not PENDING", HttpStatus.CONFLICT);
         }
@@ -135,14 +148,10 @@ public class Installment {
             financialAccount.debit(amount);
         }
 
-        Payment pay = new Payment();
-        pay.setMoment(Instant.now());
-        pay.setFinancialAccount(financialAccount);
-        pay.setInstallment(this);
-
         status = InstallmentStatus.PAID;
-
-        return pay;
+        Payment payment = new Payment(null, Instant.now(), financialAccount, this, user);
+        this.payment = payment;
+        return payment;
     }
 
     public void removePayment(Payment payment) {
@@ -159,6 +168,7 @@ public class Installment {
         }
 
         status = InstallmentStatus.PENDING;
+        this.payment = null;
     }
 
 
