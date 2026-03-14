@@ -3,10 +3,9 @@ package com.keanusantos.personalfinancemanager.domain.transaction.installment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.payment.Payment;
-import com.keanusantos.personalfinancemanager.domain.payment.dto.request.CreatePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
-import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PatchInstallmentDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.installment.update.PutInstallmentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.InstallmentStatus;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.domain.user.User;
@@ -43,6 +42,7 @@ public class Installment {
     private Transaction transaction;
 
     @OneToOne
+    @JoinColumn(name = "payment_id")
     @JsonIgnore
     private Payment payment;
 

@@ -2,13 +2,11 @@ package com.keanusantos.personalfinancemanager.domain.category;
 
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
 
 @Entity
-@Table(name = "category")
+@Table(name = "categories")
 public class Category {
 
     @Id

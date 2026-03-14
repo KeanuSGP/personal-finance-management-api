@@ -12,10 +12,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Entity
+@Table (name = "payments")
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_id")
     private Long id;
 
 //    @Column(columnDefinition = "TIMESTAMP")
