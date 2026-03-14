@@ -311,6 +311,10 @@ public class TransactionService {
         if (i.getStatus().equals(InstallmentStatus.PAID)) {
             throw new BusinessException("You cannot delete a paid installment", HttpStatus.BAD_REQUEST);
         }
+
+        if (t.getInstallments().size() <= 1) {
+            throw new BusinessException("A transaction must have at least one installment", HttpStatus.BAD_REQUEST);
+        }
         t.getInstallments().remove(i);
         repository.save(t);
     }
