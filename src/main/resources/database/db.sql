@@ -28,7 +28,8 @@ account_name VARCHAR(50) NOT NULL,
 balance FLOAT NOT NULL DEFAULT 0,
 user_id BIGINT NOT NULL,
 PRIMARY KEY (id),
-FOREIGN KEY(user_id) REFERENCES users(id)
+FOREIGN KEY(user_id) REFERENCES users(id),
+CONSTRAINT unique_name UNIQUE(account_name, user_id)
 );
 
 CREATE TABLE counterparty (
@@ -62,11 +63,26 @@ amount FLOAT NOT NULL,
 due_date DATE NOT NULL,
 installment_status ENUM('PENDING', 'PAID', 'PARTIALLY PAID', 'CANCELLED') NOT NULL,
 transaction_id BIGINT NOT NULL,
+payment_id BIGINT NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (transaction_id) REFERENCES transactions(id)
 );
 
-CREATE TABLE category (
+CREATE TABLE payments (
+id BIGINT NOT NULL,
+moment TIMESTAMP NOT NULL,
+financial_account_id BIGINT NOT NULL,
+installment_id BIGINT NOT NULL,
+user_id BIGINT NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (financial_account_id) references financial_accounts(id),
+FOREIGN KEY (installment_id) references installments(id),
+FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+ALTER TABLE installments ADD CONSTRAINT fk_payment FOREIGN KEY (payment_id) REFERENCES payments(id);
+
+CREATE TABLE categories (
 id BIGINT AUTO_INCREMENT NOT NULL,
 category_name VARCHAR(30) NOT NULL UNIQUE,
 color_hex VARCHAR(6) NOT NULL,
@@ -75,22 +91,13 @@ PRIMARY KEY(id),
 FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
-CREATE TABLE transaction_category (
+CREATE TABLE transactions_categories (
 transaction_id BIGINT NOT NULL,
 category_id BIGINT NOT NULL,
 PRIMARY KEY (transaction_id, category_id),
 FOREIGN KEY (transaction_id) references transactions(id),
-FOREIGN KEY (category_id) references category(id)
+FOREIGN KEY (category_id) references categories(id)
 );
 
-CREATE TABLE payment (
-payment_id BIGINT NOT NULL,
-moment TIMESTAMP NOT NULL,
-financial_account_id BIGINT NOT NULL,
-installment_id BIGINT NOT NULL,
-FOREIGN KEY (financial_account_id) references financial_accounts(id),
-FOREIGN KEY (installment_id) references installments(id)
-);
 
-INSERT INTO roles VALUES(1, "ROLE_ADMIN");
-INSERT INTO roles VALUES(2, "ROLE_USER");
+INSERT INTO roles VALUES(1, "ROLE_USER");
