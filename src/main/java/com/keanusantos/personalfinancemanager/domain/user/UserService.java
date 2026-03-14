@@ -50,6 +50,7 @@ public class UserService {
         return repository.findAll().stream().map(UserDTOMapper::toResponse).collect(Collectors.toList());
     }
 
+    @Transactional
     public UserResponseDTO findById(Long id) {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User entity = user.getUser();
@@ -63,11 +64,13 @@ public class UserService {
        return UserDTOMapper.toResponse(repository.findById(id).orElseThrow(ResourceNotFoundException::new));
     }
 
+    @Transactional
     public UserResponseDTO getCurrentUser() {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return UserDTOMapper.toResponse(repository.findById(user.getUser().getId()).orElseThrow(ResourceNotFoundException::new));
     }
 
+    @Transactional
     public UserResponseDTO insert(CreateUserDTO obj) {
         User user =  UserDTOMapper.toEntity(obj);
 
@@ -85,6 +88,7 @@ public class UserService {
         return UserDTOMapper.toResponse(user);
     }
 
+    @Transactional
     public UserResponseDTO updateByAuthenticatedUser(PutUserDTO obj) {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User entity = user.getUser();
@@ -98,6 +102,7 @@ public class UserService {
         return  UserDTOMapper.toResponse(entity);
     }
 
+    @Transactional
     public void delete() {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User entity = user.getUser();
@@ -107,6 +112,7 @@ public class UserService {
         repository.deleteById(entity.getId());
     }
 
+    @Transactional
     private void updateUserData(User entity, PutUserDTO obj) {
         entity.setName(obj.name());
         entity.setPassword(passwordEncoder.encode(obj.password()));

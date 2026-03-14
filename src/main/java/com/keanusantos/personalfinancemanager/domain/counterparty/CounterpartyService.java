@@ -11,6 +11,7 @@ import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,10 +28,12 @@ public class CounterpartyService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Transactional
     public Counterparty findByIdEntity(Long id) {
         return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
+    @Transactional
     public List<CounterPartyResponseDTO> findAll() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -44,6 +47,7 @@ public class CounterpartyService {
         return repository.findAll().stream().map(CounterPartyDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public List<CounterPartyResponseDTO> findAllByUserId() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -55,6 +59,7 @@ public class CounterpartyService {
         return repository.findAllByUserId(user.getId()).stream().map(CounterPartyDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public CounterPartyResponseDTO findById(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -68,6 +73,7 @@ public class CounterpartyService {
         return CounterPartyDTOMapper.toResponse(counterP);
     }
 
+    @Transactional
     public CounterPartyResponseDTO insert(CreateCounterPartyDTO obj) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -89,6 +95,7 @@ public class CounterpartyService {
         return CounterPartyDTOMapper.toResponse(counterparty);
     }
 
+    @Transactional
     public CounterPartyResponseDTO update(Long id, PutCounterpartyDTO newData) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -116,6 +123,7 @@ public class CounterpartyService {
         counterParty.setTaxId(newData.taxId());
     }
 
+    @Transactional
     public void delete(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -136,7 +144,7 @@ public class CounterpartyService {
         repository.deleteById(id);
     }
 
-
+    @Transactional
     public Counterparty findByIdAndUserId(Long id, Long userId) {
         return repository.findByIdAndUserId(id, userId).orElseThrow(() -> new BusinessException("Resource not found or access denied", HttpStatus.FORBIDDEN));
     }

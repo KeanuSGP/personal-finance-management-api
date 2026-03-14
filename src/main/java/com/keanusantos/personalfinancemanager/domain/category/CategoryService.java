@@ -11,6 +11,7 @@ import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,10 +29,11 @@ public class CategoryService {
     @Autowired
     TransactionRepository transactionRepository;
 
+    @Transactional
     public Category findByIdEntity(Long id) {
         return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
-
+    @Transactional
     public List<CategoryResponseDTO> findAll() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user =  userDetails.getUser();
@@ -46,13 +48,13 @@ public class CategoryService {
 
         return repository.findAll().stream().map(CategoryDTOMapper::toResponseDTO).toList();
     }
-
+    @Transactional
     public List<CategoryResponseDTO> findAllByAuthenticatedUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user =  userDetails.getUser();
         return repository.findAllByUser_id(user.getId()).stream().map(CategoryDTOMapper::toResponseDTO).toList();
     }
-
+    @Transactional
     public CategoryResponseDTO findById(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user =  userDetails.getUser();
@@ -62,6 +64,7 @@ public class CategoryService {
         return CategoryDTOMapper.toResponseDTO(repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new));
     }
 
+    @Transactional
     public Set<Category> findCategoriesByOwner(Set<Long> categoryIds, Long userId) {
         Set<Category> categories = repository.findAllByIdInAndUser_id(categoryIds, userId);
         if (categories.isEmpty() || categories.size() < categoryIds.size()) {
@@ -70,6 +73,7 @@ public class CategoryService {
         return categories;
     };
 
+    @Transactional
     public CategoryResponseDTO insert(CreateCategoryDTO obj) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user =  userDetails.getUser();
@@ -90,6 +94,7 @@ public class CategoryService {
         return CategoryDTOMapper.toResponseDTO(category);
     }
 
+    @Transactional
     public CategoryResponseDTO update(Long id, PutCategoryDTO obj) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user =  userDetails.getUser();
@@ -116,6 +121,7 @@ public class CategoryService {
         category.setColor(obj.color());
     }
 
+    @Transactional
     public void delete(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user =  userDetails.getUser();

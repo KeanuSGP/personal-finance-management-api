@@ -40,6 +40,7 @@ public class PaymentService {
     @Autowired
     private InstallmentRepository installmentRepository;
 
+    @Transactional
     public List<ResponsePaymentDTO> findAllByUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -49,6 +50,7 @@ public class PaymentService {
         return payments.stream().map(PaymentDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public ResponsePaymentDTO findById(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -58,6 +60,7 @@ public class PaymentService {
         return PaymentDTOMapper.toResponse(paymentRepository.findByIdAndUserId(id, user.getId()).orElseThrow(ResourceNotFoundException::new));
     }
 
+    @Transactional
     public List<ResponsePaymentDTO> findAll() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -69,6 +72,7 @@ public class PaymentService {
         return payments.stream().map(PaymentDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public ResponsePaymentDTO insert(Long iId, CreatePaymentDTO dto) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -84,6 +88,7 @@ public class PaymentService {
         return PaymentDTOMapper.toResponse(payment);
     }
 
+    @Transactional
     public void delete(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();

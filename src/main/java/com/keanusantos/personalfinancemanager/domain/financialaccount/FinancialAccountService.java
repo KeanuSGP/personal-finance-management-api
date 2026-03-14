@@ -11,6 +11,7 @@ import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.exception.BusinessException;
 import com.keanusantos.personalfinancemanager.exception.ResourceAlreadyExistsException;
 import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,10 +30,12 @@ public class FinancialAccountService {
     private TransactionRepository transactionRepository;
 
 
+    @Transactional
     public FinancialAccount findByIdEntity(Long id) {
         return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
+    @Transactional
     public List<FinancialAccountResponseDTO> findAll() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -45,6 +48,7 @@ public class FinancialAccountService {
         return repository.findAll().stream().map(FinancialAccountDTOMapper::toFinancialAccountResponseDTO).toList();
     }
 
+    @Transactional
     public List<FinancialAccountResponseDTO> findAllByUserId() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -56,6 +60,7 @@ public class FinancialAccountService {
         return repository.findAllByUserId(user.getId()).stream().map(FinancialAccountDTOMapper::toFinancialAccountResponseDTO).collect(Collectors.toList());
     }
 
+    @Transactional
     public FinancialAccountResponseDTO findById(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -65,6 +70,7 @@ public class FinancialAccountService {
         return FinancialAccountDTOMapper.toFinancialAccountResponseDTO(finAcc);
     }
 
+    @Transactional
     public FinancialAccountResponseDTO insert(CreateAccountDTO account) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -77,6 +83,7 @@ public class FinancialAccountService {
 
     }
 
+    @Transactional
     public FinancialAccountResponseDTO update(Long id, PutAccountDTO newAccountData) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -102,6 +109,7 @@ public class FinancialAccountService {
         acc.setBalance(newData.balance());
     }
 
+    @Transactional
     public void delete(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -118,10 +126,12 @@ public class FinancialAccountService {
         repository.deleteById(id);
     }
 
+    @Transactional
     public FinancialAccount findByIdAndUserId(Long id, Long userId) {
         return repository.findByIdAndUserId(id, userId).orElseThrow(ResourceNotFoundException::new);
     }
 
+    @Transactional
     public FinancialAccount findByNameAndUserId(String name, Long userId) {
         return repository.findByNameAndUserId(name, userId).orElseThrow(ResourceNotFoundException::new);
     }

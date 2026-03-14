@@ -44,11 +44,12 @@ public class TransactionService {
     @Autowired
     private CategoryService categoryService;
 
-
+    @Transactional
     public Transaction findByIdEntity(Long id) {
         return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
+    @Transactional
     public List<TransactionResponseDTO> findAll() {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User entity = user.getUser();
@@ -62,6 +63,7 @@ public class TransactionService {
         return repository.findAll().stream().map(TransactionDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public List<TransactionResponseDTO> findAllByAuthenticatedUser(){
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -71,6 +73,7 @@ public class TransactionService {
         return transactions.stream().map(TransactionDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public TransactionResponseDTO findById(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -83,6 +86,7 @@ public class TransactionService {
         return TransactionDTOMapper.toResponse(transaction);
     }
 
+    @Transactional
     public List<TransactionResponseDTO> findByFinancialAccountName(String name) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -102,6 +106,7 @@ public class TransactionService {
         return transactions.stream().map(TransactionDTOMapper::toResponse).toList();
     }
 
+    @Transactional
     public TransactionResponseDTO insert(CreateTransactionDTO obj) {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -159,6 +164,7 @@ public class TransactionService {
         return installments;
     }
 
+    @Transactional
     public TransactionResponseDTO update(Long id, PutTransactionDTO newData) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -172,6 +178,7 @@ public class TransactionService {
         return TransactionDTOMapper.toResponse(transaction);
     }
 
+    @Transactional
     private void putUpdateTransaction(Transaction transaction, User user, PutTransactionDTO newData) {
         if (repository.existsByDocAndUser_IdAndIdNot(newData.doc(), user.getId(), transaction.getId())) {
             throw new ResourceAlreadyExistsException("The transaction already exists in the system");
@@ -189,6 +196,7 @@ public class TransactionService {
         transaction.setFinancialAccount(financialAccount);
     }
 
+    @Transactional
     public PutInstallmentDTO putUpdateInstallment(Long transactionId, Long id, PutInstallmentDTO installmentDTO) {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -213,6 +221,7 @@ public class TransactionService {
         return InstallmentDTOMapper.toPutInstallmentDTO(i);
     }
 
+    @Transactional
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -241,6 +250,7 @@ public class TransactionService {
 
     }
 
+    @Transactional
     public PatchInstallmentDTO partialUpdateInstallment(Long transactionId, Long installmentId, PatchInstallmentDTO newData) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -266,6 +276,7 @@ public class TransactionService {
         return InstallmentDTOMapper.installmentToPatchDTO(installment);
     }
 
+    @Transactional
     public void delete(Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
@@ -285,6 +296,7 @@ public class TransactionService {
 
     }
 
+    @Transactional
     public void deleteInstallment(Long tId, Long iId) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
