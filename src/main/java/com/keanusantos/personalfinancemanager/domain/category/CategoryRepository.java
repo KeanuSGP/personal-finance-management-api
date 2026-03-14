@@ -20,8 +20,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Set<Category> findAllByUser_id(Long id);
     Optional<Category> findByIdAndUser_Id(Long id, Long user);
     boolean existsByIdAndUserId(Long id, Long userId);
-    @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM transaction_category WHERE category_id = :id", nativeQuery = true)
-    void deleteReferencesById(@Param("id") Long id);
 }
