@@ -1,6 +1,8 @@
-package com.keanusantos.personalfinancemanager.exception;
+package com.keanusantos.personalfinancemanager.config.security;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.keanusantos.personalfinancemanager.exception.BusinessException;
+import com.keanusantos.personalfinancemanager.exception.StandardError;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,7 +51,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
         String error = "Argument not valid";
 
-        String message = e.getBindingResult().getFieldError().getDefaultMessage();
+        String field = e.getBindingResult().getFieldError().getField();
+        String message = field + " " + e.getBindingResult().getFieldError().getDefaultMessage();
         HttpStatus status = HttpStatus.valueOf(statusCode.value());
 
 
@@ -77,6 +81,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMessage = e.getMessage();
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError errorBody = new StandardError(Instant.now(), status, errorMessage, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(errorBody);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    private ResponseEntity<StandardError> usernameNotFoundException(UsernameNotFoundException e, HttpServletRequest request) {
+        String errorMessage = e.getMessage();
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError errorBody = new StandardError(Instant.now(), status, errorMessage, e.getMessage(), request.getRequestURI());
+//        System.out.println(errorBody);
         return ResponseEntity.status(status).body(errorBody);
     }
 
