@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.counterparty;
 
-import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
 import com.keanusantos.personalfinancemanager.domain.counterparty.dto.mapper.CounterPartyDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.CreateCounterPartyDTO;
 import com.keanusantos.personalfinancemanager.domain.counterparty.dto.request.PutCounterpartyDTO;
@@ -14,7 +14,6 @@ import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundExceptio
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +27,9 @@ public class CounterpartyService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private AuthService authService;
+
     @Transactional
     public Counterparty findByIdEntity(Long id) {
         return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
@@ -35,8 +37,7 @@ public class CounterpartyService {
 
     @Transactional
     public List<CounterPartyResponseDTO> findAll() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
@@ -49,8 +50,7 @@ public class CounterpartyService {
 
     @Transactional
     public List<CounterPartyResponseDTO> findAllByUserId() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -61,8 +61,7 @@ public class CounterpartyService {
 
     @Transactional
     public CounterPartyResponseDTO findById(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -75,8 +74,7 @@ public class CounterpartyService {
 
     @Transactional
     public CounterPartyResponseDTO insert(CreateCounterPartyDTO obj) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -97,8 +95,7 @@ public class CounterpartyService {
 
     @Transactional
     public CounterPartyResponseDTO update(Long id, PutCounterpartyDTO newData) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -125,8 +122,7 @@ public class CounterpartyService {
 
     @Transactional
     public void delete(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);

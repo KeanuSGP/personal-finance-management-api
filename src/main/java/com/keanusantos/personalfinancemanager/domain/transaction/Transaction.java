@@ -36,7 +36,7 @@ public class Transaction {
     private String description;
 
     @ManyToMany(cascade = CascadeType.DETACH)
-    @JoinTable(name = "transaction_category",
+    @JoinTable(name = "transactions_categories",
             joinColumns = @JoinColumn(name = "transaction_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories;

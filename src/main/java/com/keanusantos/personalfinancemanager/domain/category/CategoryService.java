@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.category;
 
-import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
 import com.keanusantos.personalfinancemanager.domain.category.dto.mapper.CategoryDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.category.dto.request.CreateCategoryDTO;
 import com.keanusantos.personalfinancemanager.domain.category.dto.request.PutCategoryDTO;
@@ -14,7 +14,6 @@ import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundExceptio
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,10 +23,13 @@ import java.util.Set;
 public class CategoryService {
 
     @Autowired
-    CategoryRepository repository;
+    private CategoryRepository repository;
 
     @Autowired
-    TransactionRepository transactionRepository;
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private AuthService authService;
 
     @Transactional
     public Category findByIdEntity(Long id) {
@@ -35,8 +37,7 @@ public class CategoryService {
     }
     @Transactional
     public List<CategoryResponseDTO> findAll() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =  userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
         }
@@ -50,14 +51,12 @@ public class CategoryService {
     }
     @Transactional
     public List<CategoryResponseDTO> findAllByAuthenticatedUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =  userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         return repository.findAllByUser_id(user.getId()).stream().map(CategoryDTOMapper::toResponseDTO).toList();
     }
     @Transactional
     public CategoryResponseDTO findById(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =  userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
@@ -75,8 +74,7 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponseDTO insert(CreateCategoryDTO obj) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =  userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
@@ -96,8 +94,7 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponseDTO update(Long id, PutCategoryDTO obj) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =  userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
@@ -123,8 +120,7 @@ public class CategoryService {
 
     @Transactional
     public void delete(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user =  userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }

@@ -1,10 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
-import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
-import com.keanusantos.personalfinancemanager.domain.user.dto.request.CreateUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.request.PutUserDTO;
 import com.keanusantos.personalfinancemanager.domain.user.dto.response.UserResponseDTO;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,12 +26,6 @@ public class UserController {
     @GetMapping(value = "/me")
     public UserResponseDTO getCurrentUser() {
         return service.getCurrentUser();
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO insert(@Valid @RequestBody CreateUserDTO obj) {
-        return service.insert(obj);
     }
 
     @PutMapping(value = "/me")

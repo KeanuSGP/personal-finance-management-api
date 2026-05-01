@@ -1,10 +1,9 @@
 package com.keanusantos.personalfinancemanager.domain.payment;
 
-import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccount;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountRepository;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountService;
-import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.response.FinancialAccountResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.mapper.PaymentDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.request.CreatePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.response.ResponsePaymentDTO;
@@ -17,12 +16,7 @@ import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundExceptio
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-
-import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -40,10 +34,12 @@ public class PaymentService {
     @Autowired
     private InstallmentRepository installmentRepository;
 
+    @Autowired
+    private AuthService authService;
+
     @Transactional
     public List<ResponsePaymentDTO> findAllByUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
         List<Payment> payments = paymentRepository.findAllByUserId(user.getId());
         if (payments.isEmpty()) {throw new ResourceNotFoundException();}
@@ -52,8 +48,7 @@ public class PaymentService {
 
     @Transactional
     public ResponsePaymentDTO findById(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
         }
@@ -62,8 +57,7 @@ public class PaymentService {
 
     @Transactional
     public List<ResponsePaymentDTO> findAll() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
         boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
         if (!isAdmin) {throw new BusinessException("Access denied", HttpStatus.FORBIDDEN);}
@@ -74,8 +68,7 @@ public class PaymentService {
 
     @Transactional
     public ResponsePaymentDTO insert(Long iId, CreatePaymentDTO dto) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
         FinancialAccount account = financialAccountService.findByIdAndUserId(dto.financialAccount(), user.getId());
         Installment installment = installmentRepository.findByIdAndTransactionUserId(iId, user.getId()).orElseThrow(ResourceNotFoundException::new);
@@ -90,8 +83,7 @@ public class PaymentService {
 
     @Transactional
     public void delete(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
         Payment payment = paymentRepository.findByIdAndUserId(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
         Long iId = payment.getInstallment().getId();

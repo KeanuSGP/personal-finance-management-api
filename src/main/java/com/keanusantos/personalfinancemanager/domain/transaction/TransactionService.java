@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.transaction;
 
-import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
 import com.keanusantos.personalfinancemanager.domain.category.Category;
 import com.keanusantos.personalfinancemanager.domain.category.CategoryService;
 import com.keanusantos.personalfinancemanager.domain.counterparty.Counterparty;
@@ -26,7 +26,6 @@ import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundExceptio
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -43,6 +42,8 @@ public class TransactionService {
     private FinancialAccountService finAccService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private AuthService authService;
 
     @Transactional
     public Transaction findByIdEntity(Long id) {
@@ -51,12 +52,9 @@ public class TransactionService {
 
     @Transactional
     public List<TransactionResponseDTO> findAll() {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User entity = user.getUser();
-        if (entity == null) {
-            throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
-        }
-        boolean isAdmin = entity.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
+        User user = authService.getAuthenticatedUser();
+
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
         if (!isAdmin) {
             throw new BusinessException("Access denied", HttpStatus.FORBIDDEN);
         }
@@ -65,8 +63,7 @@ public class TransactionService {
 
     @Transactional
     public List<TransactionResponseDTO> findAllByAuthenticatedUser(){
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
 
         List<Transaction> transactions = repository.findAllByUser_Id(user.getId());
@@ -75,8 +72,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponseDTO findById(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
@@ -88,8 +84,7 @@ public class TransactionService {
 
     @Transactional
     public List<TransactionResponseDTO> findByFinancialAccountName(String name) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -109,8 +104,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO insert(CreateTransactionDTO obj) {
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -166,8 +160,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponseDTO update(Long id, PutTransactionDTO newData) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
@@ -199,8 +192,7 @@ public class TransactionService {
     @Transactional
     public PutInstallmentDTO putUpdateInstallment(Long transactionId, Long id, PutInstallmentDTO installmentDTO) {
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         Transaction t = repository.findByIdAndUser_Id(transactionId, user.getId()).orElseThrow(ResourceNotFoundException::new);
 
@@ -224,8 +216,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO partialUpdateTransaction(Long id, PatchTransactionDTO newData) {
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         Transaction t = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
 
@@ -252,8 +243,7 @@ public class TransactionService {
 
     @Transactional
     public PatchInstallmentDTO partialUpdateInstallment(Long transactionId, Long installmentId, PatchInstallmentDTO newData) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
@@ -278,8 +268,7 @@ public class TransactionService {
 
     @Transactional
     public void delete(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (!repository.existsByIdAndUser_Id(id, user.getId())) {
             throw new ResourceNotFoundException();
@@ -298,8 +287,7 @@ public class TransactionService {
 
     @Transactional
     public void deleteInstallment(Long tId, Long iId) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         Transaction t = repository.findById(tId).orElseThrow(ResourceNotFoundException::new);
 

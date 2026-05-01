@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
-import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.mapper.FinancialAccountDTOMapper;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.CreateAccountDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.dto.request.PutAccountDTO;
@@ -14,7 +14,6 @@ import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundExceptio
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +28,9 @@ public class FinancialAccountService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private AuthService authService;
+
 
     @Transactional
     public FinancialAccount findByIdEntity(Long id) {
@@ -37,8 +39,7 @@ public class FinancialAccountService {
 
     @Transactional
     public List<FinancialAccountResponseDTO> findAll() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("Not authenticated user found",  HttpStatus.UNAUTHORIZED);
         }
@@ -50,8 +51,7 @@ public class FinancialAccountService {
 
     @Transactional
     public List<FinancialAccountResponseDTO> findAllByUserId() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
@@ -62,8 +62,7 @@ public class FinancialAccountService {
 
     @Transactional
     public FinancialAccountResponseDTO findById(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
 
         FinancialAccount finAcc = findByIdAndUserId(id, user.getId());
 
@@ -72,8 +71,7 @@ public class FinancialAccountService {
 
     @Transactional
     public FinancialAccountResponseDTO insert(CreateAccountDTO account) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (repository.existsByNameAndUserId(account.name(), user.getId())) {
             throw new ResourceAlreadyExistsException("This account already exists: " + account.name());
         }
@@ -85,8 +83,7 @@ public class FinancialAccountService {
 
     @Transactional
     public FinancialAccountResponseDTO update(Long id, PutAccountDTO newAccountData) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }
@@ -99,8 +96,7 @@ public class FinancialAccountService {
     }
 
     public void updateAccount(FinancialAccount acc, PutAccountDTO newData) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (repository.existsByNameAndUserIdAndIdNot(newData.name(), user.getId(),  acc.getId())) {
             throw new ResourceAlreadyExistsException("Name not available: " + newData.name());
         }
@@ -111,8 +107,7 @@ public class FinancialAccountService {
 
     @Transactional
     public void delete(Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userDetails.getUser();
+        User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.FORBIDDEN);
         }

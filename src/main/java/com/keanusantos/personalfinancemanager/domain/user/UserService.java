@@ -1,6 +1,6 @@
 package com.keanusantos.personalfinancemanager.domain.user;
 
-import com.keanusantos.personalfinancemanager.config.security.UserDetailsImpl;
+import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
 import com.keanusantos.personalfinancemanager.domain.role.Role;
 import com.keanusantos.personalfinancemanager.domain.role.RoleRepository;
 import com.keanusantos.personalfinancemanager.domain.role.enums.RoleName;
@@ -14,12 +14,12 @@ import com.keanusantos.personalfinancemanager.exception.ResourceNotFoundExceptio
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +31,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private AuthService authService;
 
     public User findByIdEntity(Long id){
         return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
@@ -38,12 +40,11 @@ public class UserService {
 
     @Transactional
     public List<UserResponseDTO> findAll() {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User entity = user.getUser();
-        if (entity == null) {
+        User user = authService.getAuthenticatedUser();
+        if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
         }
-        boolean isAdmin = entity.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
         if (!isAdmin) {
             throw new BusinessException("Access denied", HttpStatus.FORBIDDEN);
         }
@@ -52,12 +53,11 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO findById(Long id) {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User entity = user.getUser();
-        if (entity == null) {
+        User user = authService.getAuthenticatedUser();
+        if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
         }
-        boolean isAdmin = entity.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRole().equals(RoleName.ROLE_ADMIN));
         if (!isAdmin) {
             throw new BusinessException("Access denied", HttpStatus.FORBIDDEN);
         }
@@ -66,8 +66,8 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO getCurrentUser() {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return UserDTOMapper.toResponse(repository.findById(user.getUser().getId()).orElseThrow(ResourceNotFoundException::new));
+        User user = authService.getAuthenticatedUser();
+        return UserDTOMapper.toResponse(repository.findById(user.getId()).orElseThrow(ResourceNotFoundException::new));
     }
 
     @Transactional
@@ -90,26 +90,24 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO updateByAuthenticatedUser(PutUserDTO obj) {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User entity = user.getUser();
+        User user = authService.getAuthenticatedUser();
 
-        if (repository.existsByNameAndIdNot(obj.name(), entity.getId())) {
+        if (repository.existsByNameAndIdNot(obj.name(), user.getId())) {
             throw new ResourceAlreadyExistsException("Name not available");
         }
 
-        updateUserData(entity, obj);
-        repository.save(entity);
-        return  UserDTOMapper.toResponse(entity);
+        updateUserData(user, obj);
+        repository.save(user);
+        return  UserDTOMapper.toResponse(user);
     }
 
     @Transactional
     public void delete() {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User entity = user.getUser();
-        if (entity == null) {
+        User user = authService.getAuthenticatedUser();
+        if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
         }
-        repository.deleteById(entity.getId());
+        repository.deleteById(user.getId());
     }
 
     @Transactional

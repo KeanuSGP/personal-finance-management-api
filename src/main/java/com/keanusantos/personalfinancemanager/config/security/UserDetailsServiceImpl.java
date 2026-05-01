@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.config.security;
 
+import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    return new UserDetailsImpl(repository.findByName(username).orElseThrow(() -> new UsernameNotFoundException(username)));
+        return new UserDetailsImpl(repository.findByName(username).orElseThrow(() -> new UsernameNotFoundException(username)));
     }
 }
