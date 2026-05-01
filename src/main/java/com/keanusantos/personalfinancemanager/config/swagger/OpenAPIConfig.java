@@ -18,10 +18,10 @@ public class OpenAPIConfig {
                         .description("Documentation of Personal Finance CRUD")
                 )
                 .components(new Components()
-                        .addSecuritySchemes("basicAuth",
+                        .addSecuritySchemes("bearer",
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.HTTP)
-                                        .scheme("basic"))
+                                        .scheme("bearer"))
                         );
     }
 }
