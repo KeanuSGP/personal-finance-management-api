@@ -31,7 +31,7 @@ import java.util.*;
 
 
 @Configuration
-@Profile("test")
+@Profile("local")
 public class TestConfig implements CommandLineRunner {
 
     @Autowired
