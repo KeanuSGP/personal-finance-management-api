@@ -87,7 +87,7 @@ public class FinancialAccountServiceTest {
 
         @Test
         void shouldCreateAccountAndReturnFinancialAccountResponseDTO() {
-            CreateAccountDTO create = new CreateAccountDTO("Account2", 200f, 1L);
+            CreateAccountDTO create = new CreateAccountDTO("Account2", 200f);
             when(finAccRepository.existsByNameAndUserId("Account2", 1L)).thenReturn(false);
             FinancialAccountResponseDTO fin = finAccService.insert(create);
             assertThat(fin).isNotNull();
@@ -96,7 +96,7 @@ public class FinancialAccountServiceTest {
 
         @Test
         void shouldReturnResourceAlreadyExistsException() {
-            CreateAccountDTO create = new CreateAccountDTO("Account2", 200f, 1L);
+            CreateAccountDTO create = new CreateAccountDTO("Account2", 200f);
             when(finAccRepository.existsByNameAndUserId("Account2", 1L)).thenReturn(true);
             assertThrows(ResourceAlreadyExistsException.class, () -> finAccService.insert(create));
         }
@@ -108,7 +108,7 @@ public class FinancialAccountServiceTest {
         void shouldUpdateAccountAndReturnFinancialAccountResponseDTO() {
             when(finAccRepository.findByIdAndUserId(2L, 1L)).thenReturn(Optional.of(finAcc));
             when(finAccRepository.existsByNameAndUserIdAndIdNot("Account2", 1L, 2L)).thenReturn(false);
-            PutAccountDTO update = new PutAccountDTO("Account2", 200f, 1L);
+            PutAccountDTO update = new PutAccountDTO("Account2", 200f);
             FinancialAccountResponseDTO dto = finAccService.update(2L, update);
             assertThat(dto).isNotNull();
             verify(finAccRepository, Mockito.times(1)).save(any());
@@ -116,7 +116,7 @@ public class FinancialAccountServiceTest {
 
         @Test
         void shouldThrowsResourceAlreadyExistsExceptionWhenAccountNameExistsForUser() {
-            PutAccountDTO update = new PutAccountDTO("Account2", 200f, 1L);
+            PutAccountDTO update = new PutAccountDTO("Account2", 200f);
             when(finAccRepository.existsByNameAndUserIdAndIdNot("Account2", 1L, 2L)).thenReturn(true);
             assertThrows(ResourceAlreadyExistsException.class, () -> finAccService.updateAccount(finAcc2, update));
         }
