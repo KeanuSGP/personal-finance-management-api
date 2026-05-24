@@ -8,6 +8,8 @@ import com.keanusantos.personalfinancemanager.domain.transaction.enums.Transacti
 import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -29,6 +31,7 @@ public class Transaction {
     private LocalDate issueDate;
 
     @Column(name = "transaction_type")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
