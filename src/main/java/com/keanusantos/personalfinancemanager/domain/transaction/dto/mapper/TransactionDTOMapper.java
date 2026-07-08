@@ -9,6 +9,7 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.tra
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.summary.CounterPartySummaryDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.summary.FinancialAccountSummaryDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.dto.mapper.UserDTOMapper;
 
@@ -18,17 +19,7 @@ import java.util.stream.Collectors;
 
 public class TransactionDTOMapper {
     public static Transaction toTransaction(CreateTransactionDTO dto, Set<Category> categories, Counterparty counterParty, FinancialAccount financialAccount, User user){
-        Transaction transaction =  new Transaction();
-        transaction.setDoc(dto.doc());
-        transaction.setIssueDate(dto.issueDate());
-        transaction.setDescription(dto.description());
-        transaction.setCategories(categories);
-        transaction.setInstallments(new ArrayList<>());
-        transaction.setCounterparty(counterParty);
-        transaction.setFinancialAccount(financialAccount);
-        transaction.setUser(user);
-
-        return transaction;
+        return new Transaction(null, dto.doc(), dto.issueDate(), dto.type(), dto.description(), categories, new ArrayList<>(), counterParty, financialAccount, user);
     }
 
     public static TransactionResponseDTO toResponse(Transaction transaction) {

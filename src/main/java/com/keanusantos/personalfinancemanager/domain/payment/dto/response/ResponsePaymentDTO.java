@@ -1,11 +1,13 @@
 package com.keanusantos.personalfinancemanager.domain.payment.dto.response;
 
-import java.time.Instant;
+import com.keanusantos.personalfinancemanager.domain.payment.dto.summary.FinancialAccountPaymentSummaryDTO;
+
+import java.time.ZonedDateTime;
 
 public record ResponsePaymentDTO(
         Long id,
-        Instant moment,
-        Long financialAccount,
+        String moment,
+        FinancialAccountPaymentSummaryDTO financialAccount,
         Long installment
 ) {
 }

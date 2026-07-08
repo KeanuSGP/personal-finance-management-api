@@ -3,13 +3,11 @@ package com.keanusantos.personalfinancemanager.config.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.keanusantos.personalfinancemanager.domain.user.User;
-import org.springframework.security.core.Authentication;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+
 
 @Service
 public class TokenService {
@@ -38,8 +36,8 @@ public class TokenService {
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (JWTCreationException exception){
-            throw new RuntimeException("error while generating token", exception);
+        } catch (TokenExpiredException exception){
+            throw new TokenExpiredException("token expired", Instant.now());
         }
     }
 }

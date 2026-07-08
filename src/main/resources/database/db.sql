@@ -57,7 +57,7 @@ amount FLOAT NOT NULL,
 due_date DATE NOT NULL,
 installment_status status NOT NULL,
 transaction_id BIGINT NOT NULL,
-payment_id BIGINT NOT NULL,
+payment_id BIGINT,
 FOREIGN KEY (transaction_id) REFERENCES transactions(id)
 );
 

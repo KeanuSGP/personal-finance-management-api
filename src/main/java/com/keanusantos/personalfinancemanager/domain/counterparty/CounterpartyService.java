@@ -73,6 +73,16 @@ public class CounterpartyService {
     }
 
     @Transactional
+    public CounterPartyResponseDTO findByName(String name) {
+        User user = authService.getAuthenticatedUser();
+        if (user == null) {
+            throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
+        }
+        Counterparty counterP = repository.findByNameAndUserId(name, user.getId()).orElseThrow(ResourceNotFoundException::new);
+        return CounterPartyDTOMapper.toResponse(counterP);
+    }
+
+    @Transactional
     public CounterPartyResponseDTO insert(CreateCounterPartyDTO obj) {
         User user = authService.getAuthenticatedUser();
 

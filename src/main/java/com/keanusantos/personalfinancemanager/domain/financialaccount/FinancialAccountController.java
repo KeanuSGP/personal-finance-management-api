@@ -35,6 +35,11 @@ public class FinancialAccountController {
         return service.findById(id);
     }
 
+    @GetMapping(value = "/name/{name}")
+    public FinancialAccountResponseDTO findByName(@PathVariable String name) {
+        return service.findByName(name);
+    }
+
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public FinancialAccountResponseDTO insert(@Valid @RequestBody CreateAccountDTO obj) {

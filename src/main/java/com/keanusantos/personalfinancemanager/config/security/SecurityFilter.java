@@ -1,5 +1,6 @@
 package com.keanusantos.personalfinancemanager.config.security;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keanusantos.personalfinancemanager.exception.StandardError;
 import jakarta.servlet.FilterChain;
@@ -48,6 +49,12 @@ public class SecurityFilter extends OncePerRequestFilter {
             StandardError error = new StandardError(Instant.now(), HttpStatus.BAD_REQUEST, "Invalid credentials", "Invalid credentials or expired", request.getRequestURI());
             String json = objectMapper.writeValueAsString(error);
             response.getWriter().write(json);
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+        }catch(TokenExpiredException e){
+            StandardError error = new StandardError(Instant.now(), HttpStatus.UNAUTHORIZED, e.getMessage(), e.getLocalizedMessage(), request.getRequestURI());
+            String json = objectMapper.writeValueAsString(error);
+            response.getWriter().write(json);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
 
     }

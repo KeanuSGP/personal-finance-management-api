@@ -39,7 +39,7 @@ public class AuthService {
             AuthResponseDTO authResponseDTO = AuthDTOMapper.toAuthResponseDTO(toResponse, token);
             return authResponseDTO;
         } catch (BadCredentialsException e) {
-            throw new BusinessException(e.getMessage(), HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Bad credentials or user not found", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -51,5 +51,10 @@ public class AuthService {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
         }
         return ((UserDetailsImpl) auth.getPrincipal()).getUser();
+    }
+
+    public String validate(String header) {
+        String token = header.substring("Bearer ".length());
+        return tokenService.validateToken(token);
     }
 }

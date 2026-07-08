@@ -42,7 +42,6 @@ public class PaymentService {
         User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
         List<Payment> payments = paymentRepository.findAllByUserId(user.getId());
-        if (payments.isEmpty()) {throw new ResourceNotFoundException();}
         return payments.stream().map(PaymentDTOMapper::toResponse).toList();
     }
 

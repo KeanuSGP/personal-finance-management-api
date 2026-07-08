@@ -18,7 +18,6 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(columnDefinition = "TIMESTAMP")
     private Instant moment;
 
     @ManyToOne
@@ -82,6 +81,17 @@ public class Payment {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", moment=" + moment +
+                ", financialAccount=" + financialAccount +
+                ", installment=" + installment +
+                ", user=" + user +
+                '}';
     }
 
     @Override

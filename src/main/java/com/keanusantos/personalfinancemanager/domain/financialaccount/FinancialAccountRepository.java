@@ -1,6 +1,7 @@
 package com.keanusantos.personalfinancemanager.domain.financialaccount;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,7 +13,9 @@ public interface FinancialAccountRepository extends JpaRepository<FinancialAccou
     Optional<FinancialAccount> findByIdAndUserId(Long id, Long userId);
     List<FinancialAccount> findAllByUserId(Long userId);
     Boolean existsByNameAndUserId(String name, Long id);
-    Boolean existsByNameAndUserIdAndIdNot(String name, Long userId, Long id);
+    Boolean existsByNameIgnoreCaseAndUserIdAndIdNot(String name, Long userId, Long id);
     Optional<FinancialAccount> findByNameAndUserId(String name, Long id);
+    @Query(value = "SELECT SUM(account.balance) FROM FinancialAccount account WHERE account.user.id = :userId")
+    Float sumBalanceByUserId(Long userId);
 
 }

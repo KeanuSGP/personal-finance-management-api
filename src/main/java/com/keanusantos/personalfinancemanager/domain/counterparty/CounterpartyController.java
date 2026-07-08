@@ -35,6 +35,11 @@ public class CounterpartyController {
         return service.findById(id);
     }
 
+    @GetMapping(value = "/name/{name}")
+    public CounterPartyResponseDTO findByName(@PathVariable String name) {
+        return service.findByName(name);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CounterPartyResponseDTO insert(@RequestBody @Valid CreateCounterPartyDTO obj) {

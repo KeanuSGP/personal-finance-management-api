@@ -12,4 +12,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     boolean existsByIdAndUserId(Long id, Long userId);
     List<Payment> findAllByUserId(Long userId);
     Optional<Payment> findByIdAndUserId(Long id, Long userId);
+    List<Payment> findTop3ByUserIdOrderByMomentDesc(Long userId);
 }

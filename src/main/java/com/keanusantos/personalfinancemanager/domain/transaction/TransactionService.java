@@ -276,11 +276,14 @@ public class TransactionService {
 
         Transaction t = repository.findByIdAndUser_Id(id, user.getId()).orElseThrow(ResourceNotFoundException::new);
 
-        if (repository.existsPaidInstallmentById(id)) {
-            t.getInstallments().removeIf(i -> i.getStatus() != InstallmentStatus.PAID);
-            repository.save(t);
+        if (!repository.existsPaidInstallmentById(id)) {
+            t.getCategories().clear();
+            t.setCounterparty(null);
+            t.setFinancialAccount(null);
+            t.setUser(null);
+            repository.delete(t);
         } else {
-            repository.deleteById(id);
+            throw new BusinessException("You cannot delete a transaction with paid installments", HttpStatus.BAD_REQUEST);
         }
 
     }

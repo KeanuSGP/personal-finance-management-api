@@ -70,6 +70,17 @@ public class FinancialAccountService {
     }
 
     @Transactional
+    public FinancialAccountResponseDTO findByName(String name) {
+        User user = authService.getAuthenticatedUser();
+        if (user == null) {
+            throw new BusinessException("Not authenticated user found", HttpStatus.UNAUTHORIZED);
+        }
+
+        FinancialAccount finAcc = repository.findByNameAndUserId(name, user.getId()).orElseThrow(ResourceNotFoundException::new);
+        return FinancialAccountDTOMapper.toFinancialAccountResponseDTO(finAcc);
+    }
+
+    @Transactional
     public FinancialAccountResponseDTO insert(CreateAccountDTO account) {
         User user = authService.getAuthenticatedUser();
         if (repository.existsByNameAndUserId(account.name(), user.getId())) {
@@ -97,10 +108,9 @@ public class FinancialAccountService {
 
     public void updateAccount(FinancialAccount acc, PutAccountDTO newData) {
         User user = authService.getAuthenticatedUser();
-        if (repository.existsByNameAndUserIdAndIdNot(newData.name(), user.getId(),  acc.getId())) {
+        if (repository.existsByNameIgnoreCaseAndUserIdAndIdNot(newData.name().toLowerCase(), user.getId(),  acc.getId())) {
             throw new ResourceAlreadyExistsException("Name not available: " + newData.name());
         }
-
         acc.setName(newData.name());
         acc.setBalance(newData.balance());
     }

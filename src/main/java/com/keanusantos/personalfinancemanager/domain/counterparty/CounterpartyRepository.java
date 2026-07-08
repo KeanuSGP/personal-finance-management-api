@@ -14,5 +14,6 @@ public interface CounterpartyRepository extends JpaRepository<Counterparty, Long
     boolean existsByNameAndUserIdAndIdNot(String name, Long id, Long userId);
     boolean existsByTaxIdAndUserIdAndIdNot(String taxId, Long id, Long userId);
     Optional<Counterparty> findByIdAndUserId(Long id, Long userId);
+    Optional<Counterparty> findByNameAndUserId(String name, Long id);
     List<Counterparty> findAllByUserId(Long userId);
 }

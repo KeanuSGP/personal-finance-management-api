@@ -8,11 +8,9 @@ import com.keanusantos.personalfinancemanager.domain.user.dto.request.CreateUser
 import com.keanusantos.personalfinancemanager.domain.user.dto.response.UserResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Base64;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -26,13 +24,18 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping(value = "/login")
-    public AuthResponseDTO Login(@RequestBody @Valid AuthDTO dto) {
+    public AuthResponseDTO login(@RequestBody @Valid AuthDTO dto) {
         AuthResponseDTO response = authService.login(dto);
         return response;
     }
 
     @PostMapping(value = "/register")
-    public UserResponseDTO Register(@RequestBody @Valid CreateUserDTO dto) {
+    public UserResponseDTO register(@RequestBody @Valid CreateUserDTO dto) {
         return userService.insert(dto);
+    }
+
+    @PostMapping(value= "/validate")
+    public String validate(@RequestHeader("Authorization") String header) {
+        return authService.validate(header);
     }
 }

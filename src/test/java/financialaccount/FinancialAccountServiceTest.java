@@ -107,7 +107,7 @@ public class FinancialAccountServiceTest {
         @Test
         void shouldUpdateAccountAndReturnFinancialAccountResponseDTO() {
             when(finAccRepository.findByIdAndUserId(2L, 1L)).thenReturn(Optional.of(finAcc));
-            when(finAccRepository.existsByNameAndUserIdAndIdNot("Account2", 1L, 2L)).thenReturn(false);
+            when(finAccRepository.existsByNameIgnoreCaseAndUserIdAndIdNot("Account2", 1L, 2L)).thenReturn(false);
             PutAccountDTO update = new PutAccountDTO("Account2", 200f);
             FinancialAccountResponseDTO dto = finAccService.update(2L, update);
             assertThat(dto).isNotNull();
@@ -117,7 +117,7 @@ public class FinancialAccountServiceTest {
         @Test
         void shouldThrowsResourceAlreadyExistsExceptionWhenAccountNameExistsForUser() {
             PutAccountDTO update = new PutAccountDTO("Account2", 200f);
-            when(finAccRepository.existsByNameAndUserIdAndIdNot("Account2", 1L, 2L)).thenReturn(true);
+            when(finAccRepository.existsByNameIgnoreCaseAndUserIdAndIdNot("Account2", 1L, 2L)).thenReturn(true);
             assertThrows(ResourceAlreadyExistsException.class, () -> finAccService.updateAccount(finAcc2, update));
         }
     }

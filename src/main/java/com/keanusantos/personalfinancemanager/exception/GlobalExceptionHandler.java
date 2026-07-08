@@ -1,5 +1,7 @@
 package com.keanusantos.personalfinancemanager.exception;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -77,6 +79,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<StandardError> illegalArgumentHandler(IllegalArgumentException e, HttpServletRequest request) {
         String errorMessage = e.getMessage();
         HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError errorBody = new StandardError(Instant.now(), status, errorMessage, e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(errorBody);
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    private ResponseEntity<StandardError> tokenExpiredHandler(TokenExpiredException e, HttpServletRequest request) {
+        String errorMessage = e.getMessage();
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
         StandardError errorBody = new StandardError(Instant.now(), status, errorMessage, e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(errorBody);
     }
