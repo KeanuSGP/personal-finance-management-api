@@ -1,0 +1,34 @@
+.transactionsContainer {
+    height: 100vh; 
+    width: 100vw; 
+    display: flex;
+    box-sizing: border-box;
+}
+
+.transactionsMainContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.tansactionsTableContainer {
+    overflow: auto;
+    width: 100%;
+    border-radius: 5px;
+    padding: 20px;
+    background-color: var(--element);
+}
+
+@media(max-width: 768px) {
+    .transactionsContainer {
+        flex-direction: column;
+    }
+
+    .transactionsMainContainer {
+        margin-top: 0;
+    }
+}

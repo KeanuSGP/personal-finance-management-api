@@ -1,0 +1,25 @@
+.page-body {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.data-body {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .page-body {
+        flex-direction: column;
+    }
+
+    .data-body {
+        margin-top: 0;
+    }
+}

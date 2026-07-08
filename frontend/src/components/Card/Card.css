@@ -1,0 +1,40 @@
+
+.cardContainer {
+    font-size: 15px;
+    min-width: 350px;
+    height: 185px;
+    padding: 10px;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid black;
+    border-radius: 20px;
+}
+
+.selected {
+    border: 5px solid pink;
+}
+
+.entityData {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+.header {
+    display: flex;
+    gap: 0 20px;
+    justify-content: space-between;
+}
+
+.color-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid black;
+}
+
+.none-display {
+    display: none;
+}

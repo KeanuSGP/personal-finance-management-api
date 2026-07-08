@@ -1,0 +1,93 @@
+.entityPageHeaderComponent {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    padding: 20px;
+    align-items: center;
+    background-color: var(--element);
+    border-radius: 5px;
+}
+
+.entityName {
+    font-weight: 700;
+    font-size: 2.5em;
+}
+
+.pageButtons {
+    display: flex;
+    align-items: center;
+    /* justify-content: right; */
+    gap: 20px;
+}
+
+.transactionAditionalBtns {
+    display: flex;
+    gap: 20px;
+}
+
+.delete {
+    font-size: 1.5em;
+    background-color: red;
+    color: white;
+}
+
+.delete:disabled {
+    background-color: #823a3a;
+    color: rgb(159, 159, 159);
+    cursor: not-allowed;
+}
+
+.new, .edit {
+    background-color: var(--main-color);
+    color: white;
+    font-size: 1.5em;
+}
+
+.new:disabled, .edit:disabled {
+    background-color: var(--main-color-hover);
+    color: rgb(159, 159, 159);
+    cursor: not-allowed;
+}
+
+
+.scale:hover {
+    transform: scale(1.03);
+}
+
+.pay {
+    background-color: green;
+    color: white;
+    font-size: 1.5em;
+}
+
+.pay:disabled {
+    background-color: rgb(20, 41, 20);
+    color: rgb(159, 159, 159);
+    cursor: not-allowed;
+}
+
+.paymentContext {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    .entityName {
+        font-size: 1.5em;
+        width: 100%;
+        text-align: center;
+    }
+
+    .entityPageHeaderComponent {
+        flex-direction: column;
+    }
+
+    .pageButtons {
+        margin-top: 10px;
+        align-items: center;
+        width: 100%;
+        /* justify-content: center; */
+        padding: 10px;
+        overflow: scroll;
+    }
+}
