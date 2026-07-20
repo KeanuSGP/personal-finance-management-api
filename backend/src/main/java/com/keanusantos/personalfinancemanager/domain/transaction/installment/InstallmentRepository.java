@@ -15,4 +15,10 @@ public interface InstallmentRepository extends JpaRepository<Installment, Long> 
 
     @Query(value = "SELECT COALESCE(SUM (i.amount),0) FROM Installment i JOIN Transaction t ON t.id = i.transaction.id JOIN Payment p ON p.id = i.payment.id WHERE i.status = PAID AND t.type = DEBIT AND t.user.id = :userId AND p.moment BETWEEN :begin AND :end")
     Double sumExpenseByActualMonthAndUserId(@Param("userId") Long userId,  @Param("begin")Instant begin, @Param("end")Instant end);
+
+    @Query(value = "SELECT COALESCE(SUM (i.amount),0) FROM installments i JOIN transactions t ON t.id = i.transaction_id JOIN payments p ON p.id = i.payment_id WHERE i.installment_status = 'PAID' AND t.transaction_type = 'CREDIT' AND t.user_id = :userId AND p.moment >= CURRENT_DATE - INTERVAL '6 months'", nativeQuery = true)
+    Double sumLastSixMonthRevenueByUserId(@Param("userId") Long userId);
+
+    @Query(value = "SELECT COALESCE(SUM (i.amount),0) FROM installments i JOIN transactions t ON t.id = i.transaction_id JOIN payments p ON p.id = i.payment_id WHERE i.installment_status = 'PAID' AND t.transaction_type = 'DEBIT' AND t.user_id = :userId AND p.moment >= CURRENT_DATE - INTERVAL '6 months'", nativeQuery = true)
+    Double sumLastSixMonthExpenseByUserId(@Param("userId") Long userId);
 }

@@ -1,11 +1,13 @@
 package com.keanusantos.personalfinancemanager.domain.dashboard;
 
 import com.keanusantos.personalfinancemanager.domain.auth.AuthService;
+import com.keanusantos.personalfinancemanager.domain.category.CategoryRepository;
+import com.keanusantos.personalfinancemanager.domain.dashboard.summary.DashboardCategorySummary;
+import com.keanusantos.personalfinancemanager.domain.dashboard.summary.MensalSummaryDTO;
 import com.keanusantos.personalfinancemanager.domain.financialaccount.FinancialAccountRepository;
 import com.keanusantos.personalfinancemanager.domain.payment.Payment;
 import com.keanusantos.personalfinancemanager.domain.payment.PaymentRepository;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.mapper.PaymentDTOMapper;
-import com.keanusantos.personalfinancemanager.domain.payment.dto.response.ResponsePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
 import com.keanusantos.personalfinancemanager.domain.transaction.TransactionRepository;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper.TransactionDTOMapper;
@@ -16,8 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -32,6 +37,8 @@ public class DashboardService {
     private AuthService authService;
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     public DashboardDTO dashboard() {
         User user = authService.getAuthenticatedUser();
@@ -50,6 +57,10 @@ public class DashboardService {
         Instant end = lastMomentOfMonth.toInstant();
         Double monthlyRevenue = installmentRepository.sumRevenueByActualMonthAndUserId(user.getId(), begin, end);
         Double monthlyExpense = installmentRepository.sumExpenseByActualMonthAndUserId(user.getId(), begin, end);
-        return new DashboardDTO(totalBalance, latest.stream().map(PaymentDTOMapper::toResponse).toList(), latestTransactions.stream().map(TransactionDTOMapper::toResponse).toList(),monthlyRevenue, monthlyExpense);
+        Double sixMonthsRevenue = installmentRepository.sumLastSixMonthRevenueByUserId(user.getId());
+        Double sixMonthExpense = installmentRepository.sumLastSixMonthExpenseByUserId(user.getId());
+        List<DashboardCategorySummary> revenueC = categoryRepository.sumTop5RevenueCategoryByUserId(user.getId());
+        List<DashboardCategorySummary> expenseC = categoryRepository.sumTop5ExpenseCategoryByUserId(user.getId());
+        return new DashboardDTO(totalBalance, latest.stream().map(PaymentDTOMapper::toResponse).toList(), latestTransactions.stream().map(TransactionDTOMapper::toResponse).toList(),monthlyRevenue, monthlyExpense, sixMonthsRevenue, sixMonthExpense, revenueC, expenseC);
     }
 }
