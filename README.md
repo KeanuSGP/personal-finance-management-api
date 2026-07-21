@@ -48,3 +48,11 @@ The complete record containing the document, issue date, due date, amount, and o
 
 ### Payment
 Displays the timestamp, the account that made the payment, and the ID of the paid installment. Deleting payments is allowed; however, installments and transactions cannot be deleted while they are marked as paid.
+
+## Analytics & Features
+
+### Revenue & Expense Dashboard
+<img width="1590" height="516" alt="image" src="https://github.com/user-attachments/assets/277038e1-494f-4e46-aa09-849905a85399" />
+
+- **Doughnut Chart:** Visualizes top 5 categories with highest expenses vs. revenues.
+- **Bar Chart:** Compares monthly revenues against expenses for the last 6 months.
