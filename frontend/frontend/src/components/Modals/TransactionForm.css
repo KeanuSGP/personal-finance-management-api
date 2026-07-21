@@ -1,0 +1,51 @@
+.transactionFormBody {
+    width: 100%;
+    padding: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+.transactionFormBody label {
+    width: 100%;
+}
+
+.transactionFormMain {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.labelTextSize {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.section {
+    box-sizing: border-box;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 758px;
+    padding: 5px;
+}
+
+.descriptionStyle {
+    height: 100px;
+    padding: 10px;
+    resize: none;
+    border-radius: 5px;
+    border: 2px solid rgba(173, 173, 173, 0.5);
+    outline: none;
+}
+
+.tFormInputStyle {
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    border: 2px solid rgba(173, 173, 173, 0.5);
+}
+
+.lDisplay {
+    display: flex;
+    flex-direction: column;
+}

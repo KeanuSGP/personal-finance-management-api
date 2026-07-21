@@ -1,0 +1,53 @@
+.selectContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.8em;
+    position: relative;
+}
+
+.selectExternalPart {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid rgba(173, 173, 173, 0.5);
+}
+
+.selectMainPart {
+    z-index: 1;
+    border-radius: 5px;
+    border: 2px solid rgba(173, 173, 173, 0.5);
+    display: none;
+    padding: 10px;
+    background-color: white;
+    position: absolute;
+    top: 110%;
+    width: 100%;
+}
+
+.iconSize {
+    font-size: 1.5em;
+}
+
+.activeSelect {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.option {
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.option:hover {
+    background-color: #c2a8ff;
+    border-radius: 5px;
+}
+
+.pSize {
+    color: #747474;
+}

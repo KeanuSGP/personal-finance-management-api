@@ -1,0 +1,25 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+.mainContent {
+    width: 100%;
+    padding: 20px;
+    gap: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tableDiv {
+    background-color: var(--element);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+@media(max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+}

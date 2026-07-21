@@ -1,0 +1,81 @@
+
+body {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background);
+}
+
+.inputDiv {
+    width: 100%;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 35px;
+    border-radius: 10px;
+    background-color: var(--element);
+    gap: 20px;
+    min-height: 50vh;
+    min-width: 30vw;
+}
+
+.formStyle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 300px;
+    min-height: 100%;
+    min-width: 70%;
+}
+
+.inputStyle {
+    border-radius: 5px;
+    outline: none;
+    border: 2px solid hsl(0, 0%, 80%);
+    height: 50px;
+    padding: 20px;
+    background-color: var(--element);
+}
+
+.inputStyle:focus {
+    border: 2px solid var(--main-color);
+}
+
+.inputStyle:hover {
+    background-color: hsl(0, 0%, 89%);
+}
+
+.btnStyle {
+    background-color: var(--main-color);
+    color: #fff;
+    width: 90%;
+    height: 50px;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+.btnStyle:hover {
+    transform: scale(1.02);
+}
+
+.linkStyle {
+    color: var(--main-color);
+    font-weight: 800;
+}
+
+.linkStyle:hover {
+    text-decoration: underline;
+}
+
+.msgStyle {
+    font-weight: 700;
+    margin-bottom: 30px;
+}

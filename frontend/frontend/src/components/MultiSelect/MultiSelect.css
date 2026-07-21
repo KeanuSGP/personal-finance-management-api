@@ -1,0 +1,74 @@
+.multiSelectBody {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.multiSelectHeader {
+    width: 100%;
+    padding: 10px;
+    position: relative;
+    border-radius: 5px;
+    border: 2px solid rgba(173, 173, 173, 0.5);
+}
+
+.multiSelectMain {
+    z-index:999;
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    padding: 5px;
+    position: absolute;
+    top: 110%;
+    background-color: #fff;
+    border-radius: 5px;
+    border: 2px solid rgba(173, 173, 173, 0.5);
+}
+
+.multiSelectMain>p {
+    padding: 5px 10px;
+}
+
+.multiSelectMain>p:hover {
+    background-color: rgb(226, 195, 255);
+    cursor: pointer;
+}
+
+.active {
+    display: flex;
+}
+
+.items {
+    box-sizing: border-box;
+    padding: 5px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.itemStyle {
+    background-color: #eee;
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+    gap: 10px;
+    font-size: 0.7em;
+    cursor: pointer;
+}
+
+.notRenderizedItemsP {
+    display: inline-block;
+    width: 3ch;
+}
+
+.search {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.search input {
+    outline: none;
+    border: none;
+}

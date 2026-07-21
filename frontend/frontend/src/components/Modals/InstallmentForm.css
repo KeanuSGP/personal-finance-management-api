@@ -1,0 +1,46 @@
+.installmentOverlay {
+    width: 100vw;
+    height: 100vh;
+    position:fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.installmentsBody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid black;
+    background-color: #fff;
+    overflow: auto;
+}
+
+.installmentItemBody {
+    background-color: #eee;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.installmentInputStyle {
+    width: 100%;
+    /* height: 100%; */
+}
+
+.installmentButtons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.installmentModalDiv {
+    display: flex;
+    justify-content: space-between;
+}
