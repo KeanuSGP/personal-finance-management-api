@@ -6,6 +6,7 @@ import com.keanusantos.personalfinancemanager.domain.dashboard.summary.Dashboard
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public record DashboardDTO(
         Float totalBalance,
@@ -16,6 +17,7 @@ public record DashboardDTO(
         Double sixMonthsRevenue,
         Double sixMonthsExpense,
         List<DashboardCategorySummary> top5RevenueCategories,
-        List<DashboardCategorySummary> top5ExpenseCategories
+        List<DashboardCategorySummary> top5ExpenseCategories,
+        List<MensalSummaryDTO> last6Months
 ) {
 }

@@ -113,7 +113,7 @@ public class Installment {
         this.transaction = transaction;
     }
 
-    public  Payment getPayment() {
+    public Payment getPayment() {
         return payment;
     }
     public void setPayment(Payment payment) {
@@ -189,5 +189,16 @@ public class Installment {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Installment{" +
+                "id=" + id +
+                ", installmentNumber=" + installmentNumber +
+                ", amount=" + amount +
+                ", dueDate=" + dueDate +
+                ", status=" + status +
+                '}';
     }
 }
