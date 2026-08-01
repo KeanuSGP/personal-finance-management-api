@@ -17,6 +17,7 @@
     width: 100%;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border-color)
 }
 
 .showAll {
@@ -58,7 +59,7 @@
 .latestTransactions {
     padding: 10px;
     border-radius: 10px;
-    background-color: hsl(0, 95%, 100%);
+    border: 1px solid var(--border-color)
 }
 
 
@@ -80,17 +81,14 @@
 }
 
 .balance {
-    color: var(--main-color);
     font-weight: 700;
 }
 
 .revenue {
-    color: var(--main-color);
     font-weight: 700;
 }
 
 .expense {
-    color: red;
     font-weight: 700;
 }
 
@@ -101,6 +99,47 @@
     flex-direction: column;
     gap: 20px;
     height: auto;
+}
+
+.graphContainer {
+    display: flex;
+    width: 100%;
+    height: 300px;
+    align-items: stretch;
+    gap: 10px;
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    align-items: center;
+
+}
+
+ .doughnutDiv {
+    width: 25%;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+ }
+
+ .barGraphDiv {
+    width: 100%;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+ }
+
+ .valueDiv {
+    display: flex;
+    gap: 10px;
+}
+
+.positive {
+    color: green;
+}
+
+.negative {
+    color: red;
 }
 
 @media(max-width: 990px) {

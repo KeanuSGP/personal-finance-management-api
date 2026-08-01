@@ -114,7 +114,7 @@ const TransactionForm = ({ transaction, handleInput, handleSelect, handleMultiSe
                                 data={transactionType}
                                 handleChange={handleSelect}
                                 itemName={"type"}
-                                value={transactionType[0].name}
+                                standardValue={transactionType[0].name}
                             />
                         </label>)}
                         
@@ -127,7 +127,7 @@ const TransactionForm = ({ transaction, handleInput, handleSelect, handleMultiSe
                         <label style={{display: `${editingContext ? 'block' : 'none'}`}}>Situação:
                             <div>
                                 <h4>
-                                   {selected.status}
+                                   {selected.installment?.status}
                                 </h4>
                                 </div>
                         </label>

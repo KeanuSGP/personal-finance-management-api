@@ -1,20 +1,21 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { api, apiLogout } from '../services/api';
 import { useToast } from '../components/ToastNotification/useToast';
-
+import { api, injectLogout } from '../services/api';
 
 const AuthContext = createContext();
-
 
 function AuthProvider({ children }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [user, setUser] = useState({});
     const { addToast } = useToast();
 
+    useEffect(() => {injectLogout(logout)}, [])
+
     useEffect(() => {
+        
         const user = JSON.parse(localStorage.getItem('user'));
 
         async function validate(user) {
@@ -22,25 +23,23 @@ function AuthProvider({ children }) {
                 console.log(user)
                 const response = await api.post('/auth/validate', {}, { headers: { 'Authorization': 'Bearer ' + user.token } })
                 if (response) {
-                    console.log(response)
                     setIsAuthenticated(true);
                     setUser(user)
                 } else {
-                    handleLogout()
+                    logout()
                 }
             } catch (e) {
                 console.log(e)
-                handleLogout()
+                logout()
             }
         }
         if (user !== null) {
             validate(user)
         } else {
-            handleLogout()
+            logout()
         }
+        setLoading(false);
     }, [])
-
-    useEffect(() => { apiLogout(handleLogout) }, [])
 
     const validation = (name, password) => {
         if (name.length === 0) {
@@ -78,7 +77,7 @@ function AuthProvider({ children }) {
             setIsAuthenticated(true);
             setLoading(false)
         } catch (e) {
-            console.log(e.code)
+            console.log(e)
             if (e.code == 'ERR_NETWORK') {
                 addToast("ERRO DE CONEXÃO COM O SERVIDOR", "error")
             }
@@ -87,13 +86,13 @@ function AuthProvider({ children }) {
         }
     }
 
-    const handleLogout = () => {
+    const logout = () => {
         localStorage.removeItem('user')
         setIsAuthenticated(false)
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, handleSubmit, setUsername, setPassword, handleLogout, user, loading }}>
+        <AuthContext.Provider value={{ isAuthenticated, handleSubmit, setUsername, setPassword, logout, user, loading }}>
             {children}
         </AuthContext.Provider>
     )

@@ -1,31 +1,69 @@
-.tableComponentStyle {
-    border-collapse: collapse;
-    white-space: nowrap;
+.tableComponent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.searchBarDiv {
+    border: 1px solid var(--border-color);
+    position: sticky;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.searchBar {
+    border: none;
+    outline: none;
     width: 100%;
+    padding: 5px;
 }
 
 .tableContainer {
     width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: auto;
 }
 
-thead {
+.tableElement {
+    border-collapse: collapse;
+    white-space: nowrap;
+    width: 100%;
+    overflow: auto;
+}
+
+.sortIcon {
+    height: 100%;
+
+}
+
+.tableElement thead {
     font-size: 0.8em;
-    background-color: rgb(75, 38, 221);
-    color: #fff;
+    text-align: center;
 }
 
-table>thead>tr>th {
-    font-size: 1.3em;
+.tableElement thead>tr>th {
+    font-size: 1.2em;
     text-align: left;
     padding: 10px;
-    font-weight: 800;
 }
-
-tbody>tr {
+.headerStyle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     cursor: pointer;
 }
 
-tbody>tr>td {
+.tableElement tbody > tr {
+    cursor: pointer;
+    border-top: 1px solid rgb(193, 193, 193);
+    /* border-bottom: 1px solid rgb(193, 193, 193); */
+}
+
+.tableElement tbody>tr>td {
     font-size: 0.9em;
     padding: 5px 15px;
     overflow-wrap: break-word;
@@ -35,14 +73,14 @@ tbody>tr>td {
 }
 
 .selected {
-    background-color: rgb(0, 132, 255) !important;
+    background-color: var(--table-item-selected) !important;
     color: #fff
 }
 
 .isOdd {
-    background-color: rgb(230, 229, 229);
-    border-top: 1px solid rgb(193, 193, 193);
-    border-bottom: 1px solid rgb(193, 193, 193);
+    /* background-color: rgb(230, 229, 229); */
+    /* border-top: 1px solid rgb(193, 193, 193);
+    border-bottom: 1px solid rgb(193, 193, 193); */
 
 }
 

@@ -127,7 +127,7 @@ const FinancialAccountPage = () => {
 
     }
 
-    useEffect(() => {console.log( hasSelection)}, [hasSelection])
+    useEffect(() => { console.log(hasSelection) }, [hasSelection])
 
     const deleteAccount = async () => {
 
@@ -165,6 +165,7 @@ const FinancialAccountPage = () => {
                     editEntity={() => setOpenModal(true)}
                     deleteEntity={() => setOpenDeleteModal(true)}
                 />
+                {loading ? <div>Carregando...</div> : (
                 <div className='tableDiv'>
                     <Table
                         columns={columns}
@@ -173,6 +174,8 @@ const FinancialAccountPage = () => {
                         setSelected={handleSelectItem}
                     />
                 </div>
+                )}
+
 
             </div>
             {openModal && (

@@ -8,6 +8,8 @@ import { FaCheckCircle } from "react-icons/fa";
 
 const EntityPageHeader = ({ newEntity, title, editEntity, hasSelection, deleteEntity, context, deleteTransaction, payTransaction }) => {
 
+    // console.log(hasSelection)
+
     const [activeTransactionContext, setActiveTransactionContext] = useState(false);
     const [activePaymentContext, setActivePaymentContext] = useState(false);
 

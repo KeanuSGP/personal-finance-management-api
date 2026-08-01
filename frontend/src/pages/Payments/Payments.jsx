@@ -16,11 +16,12 @@ const Payments = () => {
     const [loading, setLoading] = useState(true);
     const { addToast } = useContext(toastContext)
 
-
     const columns = [
-        { header: "DATA PAGAMENTO", accessor: "moment" },
-        { header: "CONTA FINANCEIRA", accessor: "financialAccount" },
-        { header: "PARCELA", accessor: "installment" }
+        { header: "PAGO EM", accessor: "moment" },
+        { header: "CONTA FINANCEIRA", accessor: "finAcc" },
+        { header: "TRANSAÇÃO", accessor: "transactionDoc" },
+        { header: "PARCELA", accessor: "installmentNumber" },
+        { header: "VALOR", accessor: "installmentAmount", type: 'money' }
     ]
 
     const handleSelection = (id, item) => {
@@ -36,27 +37,19 @@ const Payments = () => {
         return formatted;
     }
 
-    const formatPayments = (payments) => {
-        const arr = [];
-        payments.forEach(p => {
-            const payment = {
-                id: p.id,
-                moment: formatMoment(p.moment),
-                financialAccount: p.financialAccount.name,
-                financialAccountId: p.financialAccount.id,
-                installment: p.installment
-            }
-            arr.push(payment)
-        })
-
-        setData(arr)
-    }
-
     const getPayments = async () => {
+        const dataWithFormattedMoment = [];
         try {
             const response = await api.get('/payments/me')
             if (response) {
-                formatPayments(response.data)
+                response.data.forEach(payment => {
+                    const formattedPayment = {
+                        ...payment,
+                        moment: formatMoment(payment.moment)
+                    };
+                    dataWithFormattedMoment.push(formattedPayment);
+                });
+                setData(dataWithFormattedMoment);
                 setLoading(false)
             }
         } catch (e) {
@@ -78,8 +71,7 @@ const Payments = () => {
         }
     }
 
-    useEffect(() => { getPayments() }, [])
-
+    useEffect(() => { getPayments()}, [])
 
     return (
         <>

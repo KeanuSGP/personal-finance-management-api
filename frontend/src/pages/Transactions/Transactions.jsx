@@ -10,6 +10,8 @@ import InstallmentModal from '../../components/Modals/InstallmentForm'
 import DeleteModal from '../../components/Modals/DeleteModal';
 import { toastContext, ToastProvider } from '../../components/ToastNotification/ToastProvider'
 
+import TransactionTable from '../../components/TransactionTable/TransactionTable'
+
 
 const Transactions = () => {
     const today = new Date().toLocaleDateString('pt-BR').split('/');
@@ -18,8 +20,18 @@ const Transactions = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [installmentQtd, setInstallmentQtd] = useState(1);
     const [activeInstallmentModal, setActiveInstallmentModal] = useState(false);
-    const { addToast } = useContext(toastContext)
+    const { addToast } = useContext(toastContext);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [formatedData, setFormatedData] = useState([]);
+    const [selected, setSelected] = useState(0);
+    const [selectedId, setSelectedId] = useState(0);
+    const [selectedInstallment, setSelectedInstallment] = useState(0);
+    const hasSelection = selectedId.transaction ?? false;
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
+    const [deleteContext, setDeleteContext] = useState('installment');
 
+    console.log(selectedId.transaction)
 
     const getDueDate = (date) => {
         const actualDay = Number(date.split('-')[2]);
@@ -49,17 +61,9 @@ const Transactions = () => {
         "counterparty": null,
         "financialAccount": null
     }
+
     const [transaction, setTransaction] = useState(INITIAL_TRANSACTION)
     const [transactionWithInstallments, setTransactionWithInstallments] = useState(transaction);
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [formatedData, setFormatedData] = useState([]);
-    const [selected, setSelected] = useState(0);
-    const [selectedId, setSelectedId] = useState(0);
-    const [selectedInstallment, setSelectedInstallment] = useState(0);
-    const hasSelection = selectedId != 0;
-    const [openDeleteModal, setOpenDeleteModal] = useState(false);
-    const [deleteContext, setDeleteContext] = useState('installment');
 
     const columns = [
         { header: "DOCUMENTO", accessor: "doc" },
@@ -262,30 +266,32 @@ const Transactions = () => {
     }
 
     const handleSelected = (id, item) => {
-        if (selectedId && item.id == selectedId && item.installmentNumber == selectedInstallment) return setSelectedId(0);
+        if (item.installment?.id == selectedId?.installment) return setSelectedId({ transaction: 0, installment: 0 });
         setSelected(item);
-        setSelectedId(id);
+        setSelectedId({ transaction: id.transaction, installment: id.installment });
         setSelectedInstallment(item.installmentNumber);
     }
 
     const seedTransactionFormForEdit = (selected) => {
+        console.log(selected)
+        console.log(selected.transaction.transaction?.description)
         const transaction = data.find(t => t.id == selected.id);
         const mapped = {
-            "doc": selected.doc,
-            "issueDate": selected.issueDate,
-            "type": selected.type,
-            "description": selected.description,
-            "categories": transaction.categories,
+            "doc": selected.transaction?.transaction?.doc,
+            "issueDate": selected.transaction?.transaction?.issueDate,
+            "type": selected.transaction.transaction?.type,
+            "description": selected.transaction.transaction?.description,
+            "categories": selected.transaction?.categories,
             "installments": [
                 {
-                    amount: selected.amount,
-                    dueDate: selected.dueDate
+                    amount: selected.installment?.amount,
+                    dueDate: selected.installment?.dueDate
                 }
             ],
-            "counterparty": selected.counterparty,
-            "financialAccount": selected.financialAccount
+            "counterparty": selected.transaction.counterParty.name,
+            "financialAccount": selected.transaction.financialAccount.name
         }
-
+        console.log(mapped)
         setTransaction(mapped)
     }
 
@@ -433,10 +439,9 @@ const Transactions = () => {
 
     const payInstallment = async (installmentId, financialAccount) => {
         try {
-            const financialAccountResponse = await api.get(`/accounts/name/${financialAccount}`)
             const confirmation = confirm("Deseja realmente fazer o pagamento?")
             if (confirmation) {
-                const response = await api.post(`/payments/installment/${installmentId}`, { financialAccount: financialAccountResponse.data.id })
+                const response = await api.post(`/payments/installment/${installmentId}`, { financialAccount: financialAccount });
                 if (response) {
                     addToast("Parcela paga com sucesso!", "success")
                     getTransactions();
@@ -456,6 +461,11 @@ const Transactions = () => {
         getTransactions();
     }, [])
 
+    useEffect(() => {
+        // console.log(selected);
+        // console.log(selectedId);
+    }, [selected, selectedId])
+
 
     useEffect(() => {
         if (!isOpen) clearTransactionModal();
@@ -466,6 +476,10 @@ const Transactions = () => {
             setTransactionWithInstallments(transaction);
         }
     }, [activeInstallmentModal])
+
+    useEffect(() => {
+        console.log(selected)
+    }, [selected])
 
 
     return (
@@ -483,11 +497,11 @@ const Transactions = () => {
                         deleteEntity={() => { setOpenDeleteModal(true); setDeleteContext('installment') }}
                         context={'transaction'}
                         deleteTransaction={() => { setOpenDeleteModal(true); setDeleteContext('transaction') }}
-                        payTransaction={() => payInstallment(selected.installmentId, selected.financialAccount)}
+                        payTransaction={() => payInstallment(selectedId.installment, selected.transaction.financialAccount.id)}
                     />
 
                     <div className='tansactionsTableContainer'>
-                        {!loading && (
+                        {/* {!loading && (
                             <Table
                                 columns={columns}
                                 data={formatedData}
@@ -496,7 +510,12 @@ const Transactions = () => {
                                 itemType={'transaction'}
                                 otherSelectParamether={selectedInstallment}
                             />
-                        )}
+                        )} */}
+                        <TransactionTable
+                            data={data}
+                            setSelected={handleSelected}
+                            selectedId={selectedId}
+                        />
 
                     </div>
 
@@ -527,8 +546,8 @@ const Transactions = () => {
                 )}
                 {openDeleteModal && (
                     <DeleteModal
-                        name={deleteContext == 'installment' ? ` a parcela ${selected.installmentNumber} da transação ${selected.doc}` : ` a transação ${selected.doc}`}
-                        handleDelete={deleteContext == 'installment' ? () => deleteInstallment(selectedId, selected.installmentId) : () => deleteTransaction(selectedId)}
+                        name={deleteContext == 'installment' ? ` a parcela ${selected.installment.installmentNumber} da transação ${selected.transaction.transaction.doc}` : ` a transação ${selected.transaction.transaction.doc}`}
+                        handleDelete={deleteContext == 'installment' ? () => deleteInstallment(selectedId.transaction, selectedId.installment) : () => deleteTransaction(selectedId.transaction)}
                         closeOrCancel={() => setOpenDeleteModal(false)}
                     />
                 )}
