@@ -8,6 +8,11 @@ import com.keanusantos.personalfinancemanager.domain.payment.dto.mapper.PaymentD
 import com.keanusantos.personalfinancemanager.domain.payment.dto.request.CreatePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.payment.dto.response.ResponsePaymentDTO;
 import com.keanusantos.personalfinancemanager.domain.role.enums.RoleName;
+import com.keanusantos.personalfinancemanager.domain.transaction.Transaction;
+import com.keanusantos.personalfinancemanager.domain.transaction.TransactionRepository;
+import com.keanusantos.personalfinancemanager.domain.transaction.TransactionService;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.mapper.TransactionDTOMapper;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.installment.Installment;
 import com.keanusantos.personalfinancemanager.domain.transaction.installment.InstallmentRepository;
 import com.keanusantos.personalfinancemanager.domain.user.User;
@@ -18,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class PaymentService {
@@ -37,12 +44,16 @@ public class PaymentService {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private TransactionRepository tRepository;
+
     @Transactional
     public List<ResponsePaymentDTO> findAllByUser() {
         User user = authService.getAuthenticatedUser();
         if (user == null) {throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);}
         List<Payment> payments = paymentRepository.findAllByUserId(user.getId());
-        return payments.stream().map(PaymentDTOMapper::toResponse).toList();
+        return payments.stream().map(payment -> PaymentDTOMapper.toResponse(payment, payment.getInstallment()
+                .getTransaction())).toList();
     }
 
     @Transactional
@@ -50,8 +61,9 @@ public class PaymentService {
         User user = authService.getAuthenticatedUser();
         if (user == null) {
             throw new BusinessException("No authenticated user found", HttpStatus.UNAUTHORIZED);
-        }
-        return PaymentDTOMapper.toResponse(paymentRepository.findByIdAndUserId(id, user.getId()).orElseThrow(ResourceNotFoundException::new));
+        };
+        Payment p = (paymentRepository.findByIdAndUserId(id, user.getId()).orElseThrow(ResourceNotFoundException::new));
+        return PaymentDTOMapper.toResponse(p, p.getInstallment().getTransaction());
     }
 
     @Transactional
@@ -62,7 +74,7 @@ public class PaymentService {
         if (!isAdmin) {throw new BusinessException("Access denied", HttpStatus.FORBIDDEN);}
         List<Payment> payments = paymentRepository.findAllByUserId(user.getId());
         if (payments.isEmpty()) {throw new ResourceNotFoundException();}
-        return payments.stream().map(PaymentDTOMapper::toResponse).toList();
+        return payments.stream().map(payment -> PaymentDTOMapper.toResponse(payment, payment.getInstallment().getTransaction())).toList();
     }
 
     @Transactional
@@ -77,7 +89,7 @@ public class PaymentService {
         paymentRepository.save(payment);
         installmentRepository.save(installment);
         financialAccountRepository.save(account);
-        return PaymentDTOMapper.toResponse(payment);
+        return PaymentDTOMapper.toResponse(payment, payment.getInstallment().getTransaction());
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import com.keanusantos.personalfinancemanager.domain.transaction.dto.request.tra
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.response.TransactionResponseDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.summary.CounterPartySummaryDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.dto.summary.FinancialAccountSummaryDTO;
+import com.keanusantos.personalfinancemanager.domain.transaction.dto.summary.TransactionSummaryDTO;
 import com.keanusantos.personalfinancemanager.domain.transaction.enums.TransactionType;
 import com.keanusantos.personalfinancemanager.domain.user.User;
 import com.keanusantos.personalfinancemanager.domain.user.dto.mapper.UserDTOMapper;
@@ -24,11 +25,14 @@ public class TransactionDTOMapper {
 
     public static TransactionResponseDTO toResponse(Transaction transaction) {
         return new TransactionResponseDTO(
-                transaction.getId(),
-                transaction.getDoc(),
-                transaction.getIssueDate(),
-                transaction.getType(),
-                transaction.getDescription(),
+
+                new TransactionSummaryDTO(
+                        transaction.getId(),
+                        transaction.getDoc(),
+                        transaction.getIssueDate(),
+                        transaction.getType(),
+                        transaction.getDescription()
+                ),
                 transaction.getCategories().stream().map(CategoryDTOMapper::toSummaryDTO).collect(Collectors.toSet()),
                 transaction.getInstallments(),
                 new CounterPartySummaryDTO(transaction.getCounterparty().getId(), transaction.getCounterparty().getName()),

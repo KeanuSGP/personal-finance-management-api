@@ -63,7 +63,7 @@ public class DashboardService {
         Double sixMonthExpense = installmentRepository.sumLastSixMonthExpenseByUserId(user.getId());
         List<DashboardCategorySummary> revenueC = categoryRepository.sumTop5RevenueCategoryByUserId(user.getId());
         List<DashboardCategorySummary> expenseC = categoryRepository.sumTop5ExpenseCategoryByUserId(user.getId());
-        return new DashboardDTO(totalBalance, latest.stream().map(PaymentDTOMapper::toResponse).toList(),
+        return new DashboardDTO(totalBalance, latest.stream().map(payment -> PaymentDTOMapper.toResponse(payment, payment.getInstallment().getTransaction())).toList(),
                 latestTransactions.stream().map(TransactionDTOMapper::toResponse).toList(),
                 monthlyRevenue,
                 monthlyExpense,
